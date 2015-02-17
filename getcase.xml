@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<GetCaseResponse xmlns:ecf="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:CommonTypes-4.0" xmlns:j="http://niem.gov/niem/domains/jxdm/4.0" xmlns:juvenile="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:JuvenileCase-4.0" xmlns:aoc="http://schema.azcourts.az.gov/courts/efiling/ecf/extension/2.0" xmlns:niem-xsd="http://niem.gov/niem/proxy/xsd/2.0" xmlns:fsrsp="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:FilingStatusResponseMessage-4.0" xmlns:domestic="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:DomesticCase-4.0" xmlns:s="http://niem.gov/niem/structures/2.0" xmlns:criminal="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:CriminalCase-4.0" xmlns:i="http://niem.gov/niem/appinfo/2.0" xmlns:appellate="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:AppellateCase-4.0" xmlns:nc="http://niem.gov/niem/niem-core/2.0" xmlns:citation="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:CitationCase-4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:statusquery="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:FilingStatusQueryMessage-4.0" xmlns:civil="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:CivilCase-4.0" xmlns:reviewcb="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:ReviewFilingCallbackMessage-4.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="urn:oasis:names:tc:legalxml-courtfiling:wsdl:WebServiceMessagingProfile-Definitions-4.0">
+  <CaseResponseMessage xmlns="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:CaseResponseMessage-4.0">
+    <j:CaseCourt xsi:nil="true" />
+    <aoc:CivilCase>
+      <nc:CaseTitleText>CCPACKING ET AL. Vs. Lamex</nc:CaseTitleText>
+      <nc:CaseCategoryText>Civil</nc:CaseCategoryText>
+      <nc:CaseTrackingID>C20117066</nc:CaseTrackingID>
+      <j:CaseAugmentation>
+        <j:CaseCourt>
+          <nc:OrganizationIdentification>
+            <nc:IdentificationID>courts.az.gov:1000</nc:IdentificationID>
+          </nc:OrganizationIdentification>
+          <nc:OrganizationLocation>
+            <nc:LocationAddress>
+              <nc:StructuredAddress>
+                <nc:AddressDeliveryPointText>110 West Congress Street</nc:AddressDeliveryPointText>
+                <nc:LocationCityName>Tucson</nc:LocationCityName>
+                <nc:LocationStateUSPostalServiceCode>AZ</nc:LocationStateUSPostalServiceCode>
+                <nc:LocationStateName>AZ</nc:LocationStateName>
+                <nc:LocationCountryFIPS10-4Code>US</nc:LocationCountryFIPS10-4Code>
+                <nc:LocationCountryName>United States of America</nc:LocationCountryName>
+                <nc:LocationPostalCode>85701</nc:LocationPostalCode>
+              </nc:StructuredAddress>
+              <nc:AddressFullText>110 West Congress Street Tucson AZ 85701 United States of America</nc:AddressFullText>
+            </nc:LocationAddress>
+          </nc:OrganizationLocation>
+          <j:CourtName>Pima Superior Court</j:CourtName>
+        </j:CaseCourt>
+      </j:CaseAugmentation>
+      <aoc:CaseAugmentation>
+        <nc:LanguageCode xsi:nil="true" />
+        <aoc:CaseParticipant>
+          <ecf:EntityPerson s:id="PTY0001">
+            <nc:PersonName>
+              <nc:PersonGivenName>CASSANDRA</nc:PersonGivenName>
+              <nc:PersonSurName>PRICE</nc:PersonSurName>
+              <nc:PersonFullName>CASSANDRA PRICE</nc:PersonFullName>
+            </nc:PersonName>
+          </ecf:EntityPerson>
+          <ecf:CaseParticipantRoleCode>PL</ecf:CaseParticipantRoleCode>
+        </aoc:CaseParticipant>
+        <aoc:CaseParticipant>
+          <ecf:EntityPerson s:id="PTY0002">
+            <nc:PersonName>
+              <nc:PersonGivenName>CHRISTOPHER</nc:PersonGivenName>
+              <nc:PersonSurName>PRICE</nc:PersonSurName>
+              <nc:PersonFullName>CHRISTOPHER PRICE</nc:PersonFullName>
+            </nc:PersonName>
+          </ecf:EntityPerson>
+          <ecf:CaseParticipantRoleCode>PL</ecf:CaseParticipantRoleCode>
+        </aoc:CaseParticipant>
+        <aoc:CaseParticipant>
+          <aoc:EntityOrganization>
+            <nc:OrganizationLocation xsi:nil="true" />
+            <nc:OrganizationName>SURETY ACCEPTANCE CO</nc:OrganizationName>
+            <nc:OrganizationPrimaryContactInformation>
+              <nc:ContactMailingAddress>
+                <nc:StructuredAddress>
+                  <nc:AddressDeliveryPointText>400 East Broadway Boulevard</nc:AddressDeliveryPointText>
+                  <nc:LocationCityName>Tucson</nc:LocationCityName>
+                  <nc:LocationStateUSPostalServiceCode>AZ</nc:LocationStateUSPostalServiceCode>
+                  <nc:LocationStateName>AZ</nc:LocationStateName>
+                  <nc:LocationPostalCode>85711</nc:LocationPostalCode>
+                </nc:StructuredAddress>
+                <nc:AddressFullText>400 East Broadway Boulevard Tucson AZ 85711</nc:AddressFullText>
+              </nc:ContactMailingAddress>
+              <nc:ContactTelephoneNumber s:id="PRIMARYPHONE">
+                <nc:FullTelephoneNumber>
+                  <nc:TelephoneNumberFullID>520-790-7181</nc:TelephoneNumberFullID>
+                </nc:FullTelephoneNumber>
+              </nc:ContactTelephoneNumber>
+            </nc:OrganizationPrimaryContactInformation>
+            <nc:OrganizationSubUnitName xsi:nil="true" />
+            <nc:OrganizationTaxIdentification xsi:nil="true" />
+            <nc:OrganizationUnitName xsi:nil="true" />
+            <j:OrganizationAugmentation1 />
+            <ecf:OrganizationAugmentation />
+          </aoc:EntityOrganization>
+          <ecf:CaseParticipantRoleCode>DE</ecf:CaseParticipantRoleCode>
+        </aoc:CaseParticipant>
+      </aoc:CaseAugmentation>
+      <civil:ClassActionIndicator>false</civil:ClassActionIndicator>
+      <civil:JuryDemandIndicator>true</civil:JuryDemandIndicator>
+      <aoc:CaseGeneralCategoryText>Civil</aoc:CaseGeneralCategoryText>
+      <aoc:CaseSubCategoryText>Default</aoc:CaseSubCategoryText>
+      <aoc:CounterClaimDescription xsi:nil="true" />
+    </aoc:CivilCase>
+  </CaseResponseMessage>
+</GetCaseResponse>

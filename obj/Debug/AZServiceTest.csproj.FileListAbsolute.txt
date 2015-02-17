@@ -1,0 +1,9 @@
+C:\Samples2015\AZServiceTest\bin\Debug\AZServiceTest.exe.config
+C:\Samples2015\AZServiceTest\obj\Debug\AZServiceTest.csprojResolveAssemblyReference.cache
+C:\Samples2015\AZServiceTest\obj\Debug\AZServiceTest.Form1.resources
+C:\Samples2015\AZServiceTest\obj\Debug\AZServiceTest.Properties.Resources.resources
+C:\Samples2015\AZServiceTest\obj\Debug\AZServiceTest.csproj.GenerateResource.Cache
+C:\Samples2015\AZServiceTest\bin\Debug\AZServiceTest.exe
+C:\Samples2015\AZServiceTest\bin\Debug\AZServiceTest.pdb
+C:\Samples2015\AZServiceTest\obj\Debug\AZServiceTest.exe
+C:\Samples2015\AZServiceTest\obj\Debug\AZServiceTest.pdb
