@@ -25,7 +25,7 @@ using System.ServiceModel.Description;
 
 namespace VistaSG.Services
 {
-
+     
 
     public  class CustomChannelFactory<T> : ChannelFactory<T>
     {
