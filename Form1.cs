@@ -17,6 +17,10 @@ using caseResponse = Oasis.LegalXml.CourtFiling.v40.CaseResponse;
 using System.Configuration;
 using core = Oasis.LegalXml.CourtFiling.v40.Core;
 using Niem.Structures.v20;
+using System.Xml.Schema;
+using System.Xml.Linq;
+using azs = Arizona.Courts.Services.v20;
+
 namespace AZServiceTest
 {
     public partial class Form1 : Form
@@ -90,11 +94,11 @@ namespace AZServiceTest
 
         private void button2_Click(object sender, EventArgs e)
         {
-            wmp.ICourtRecordMDE _serviceChannel = null;
+            azs.ICourtRecordMDE _serviceChannel = null;
 
             try
             {
-                _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<wmp.ICourtRecordMDE>
+                _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<azs.ICourtRecordMDE>
                     (
                         "CourtRecordMDEService",
                         _configFile
@@ -128,12 +132,18 @@ namespace AZServiceTest
             {
                 return new caseQuery.CaseQueryMessageType
                 {
-                    CaseTrackingID = new Niem.Proxy.xsd.v20.String("P-1300-CV-20020106"),
+                    CaseTrackingID = new Niem.Proxy.xsd.v20.String(this.textBoxCaseNumber.Text.Trim()),
                     CaseCourt = this.CaseCourt,
                     QuerySubmitter = new Niem.NiemCore.v20.EntityType
                     {
                         EntityRepresentation = this.PersonAtKeyBoard,
                         EntityRepresentationType = Niem.NiemCore.v20.EntityRepresentationTpes.EcfPerson
+                    },
+                    CaseQueryCriteria = new caseQuery.CaseQueryCriteriaType
+                    {
+                         IncludeParticipantsIndicator = new niemxsd.Boolean(true) ,
+                         IncludeCalendarEventIndicator = new niemxsd.Boolean(false) ,
+                          IncludeDocketEntryIndicator = new niemxsd.Boolean(false)
                     }
                 };
             }
@@ -173,7 +183,7 @@ namespace AZServiceTest
             {
                 return new j.CourtType
                 {
-                    OrganizationIdentification = new List<nc.IdentificationType> { new nc.IdentificationType("courts.az.gov:1000") },
+                    OrganizationIdentification = new List<nc.IdentificationType> { new nc.IdentificationType("courts.az.gov:1300") },
                     OrganizationLocation = new List<nc.LocationType>
                      {
                          new nc.LocationType
@@ -195,7 +205,7 @@ namespace AZServiceTest
                      },
                     CourtName = new List<nc.TextType>
                      {
-                         new  nc.TextType("Yavapai County Superior Court ")
+                         new  nc.TextType("Yavapai County Superior Court -  Prescott")
                      }
                 };
             }
@@ -1157,5 +1167,103 @@ namespace AZServiceTest
 
 
         }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opeFileDialog = null;
+            try
+            {
+                opeFileDialog = new OpenFileDialog();
+                opeFileDialog.CheckFileExists = false;
+                opeFileDialog.CheckPathExists = true;
+                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                opeFileDialog.Title = "Select a file to Deserialize ";
+                DialogResult dr = opeFileDialog.ShowDialog(this);
+                if (dr == DialogResult.OK)
+                {
+                    aoc.CivilCaseType civilCase = null;
+                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open))
+                    {
+                        XmlSerializer serializer = new XmlSerializer(typeof(aoc.CivilCaseType));
+                        civilCase = serializer.Deserialize(fs) as aoc.CivilCaseType;
+                        fs.Flush();
+                        fs.Close();
+                    }
+                    if (civilCase != null)
+                    {
+                        int numberOfCaseParticipants = 0;
+                        if (civilCase != null && civilCase.EcfCaseAugmentation != null && civilCase.EcfCaseAugmentation.CaseParticipant != null)
+                        {
+                            numberOfCaseParticipants = civilCase.EcfCaseAugmentation.CaseParticipant.Count;
+                        }
+                        MessageBox.Show(string.Format("# Participants {0}  ", numberOfCaseParticipants));
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Civil Case is null !!!!");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (opeFileDialog != null)
+                {
+                    opeFileDialog.Dispose();
+                }
+            }
+
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opeFileDialog = null;
+            try
+            {
+                opeFileDialog = new OpenFileDialog();
+                opeFileDialog.CheckFileExists = false;
+                opeFileDialog.CheckPathExists = true;
+                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                opeFileDialog.Title = "Select a file to Validate ";
+                DialogResult dr = opeFileDialog.ShowDialog(this);
+                if (dr == DialogResult.OK)
+                {
+                    XmlSchemaSet schemas = new XmlSchemaSet();
+                    schemas.Add
+                        (
+                            "http://schema.azcourts.az.gov/aoc/efiling/ecf/exchange/GetCase/2.0",
+                            "http://webservicedev/contracts/ecf-v4.0-spec/xsd/exchange/GetCase-MessageExchange.xsd"
+                        );
+                    XDocument doc = XDocument.Load(opeFileDialog.FileName);
+                    bool errors = false;
+                    doc.Validate(schemas, (o, validationError) =>
+                    {
+                        MessageBox.Show(string.Format( "{0}", validationError.Message));
+                        errors = true;
+                    }, true);
+                    MessageBox.Show(string.Format( "document {0} {1}", opeFileDialog.FileName, errors ? "did not validate" : "validated"));
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (opeFileDialog != null)
+                {
+                    opeFileDialog.Dispose();
+                }
+            }
+
+        }
+
     }
 }
