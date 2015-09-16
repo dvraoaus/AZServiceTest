@@ -20,7 +20,7 @@ using Niem.Structures.v20;
 using System.Xml.Schema;
 using System.Xml.Linq;
 using azs = Arizona.Courts.Services.v20;
-
+using System.Diagnostics;
 namespace AZServiceTest
 {
     public partial class Form1 : Form
@@ -142,8 +142,8 @@ namespace AZServiceTest
                     CaseQueryCriteria = new caseQuery.CaseQueryCriteriaType
                     {
                          IncludeParticipantsIndicator = new niemxsd.Boolean(true) ,
-                         IncludeCalendarEventIndicator = new niemxsd.Boolean(false) ,
-                          IncludeDocketEntryIndicator = new niemxsd.Boolean(false)
+                         IncludeCalendarEventIndicator = new niemxsd.Boolean(true) ,
+                          IncludeDocketEntryIndicator = new niemxsd.Boolean(true)
                     }
                 };
             }
@@ -217,7 +217,7 @@ namespace AZServiceTest
             SaveFileDialog saveFileDialog = null;
             try
             {
-                if (response != null)
+                if (response != null && response.CaseResponseMessage != null && response.CaseResponseMessage.Case != null && response.CaseResponseMessage.Case is aoc.CivilCaseType )
                 {
 
                     saveFileDialog = new SaveFileDialog();
@@ -225,6 +225,7 @@ namespace AZServiceTest
                     saveFileDialog.CheckPathExists = true;
                     saveFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
                     saveFileDialog.Title = "Select a file to save  to ";
+                    saveFileDialog.FileName = this.textBoxCaseNumber.Text;
                     DialogResult dr = saveFileDialog.ShowDialog(this);
                     if (dr == DialogResult.OK)
                     {
@@ -233,8 +234,8 @@ namespace AZServiceTest
                         {
                             XmlSerializerNamespaces namespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
                             ecf.EcfHelper.AddNameSpaces(namespaces);
-                            XmlSerializer serializer = new XmlSerializer(typeof(wmp.GetCaseResponse));
-                            serializer.Serialize(fs, response, namespaces);
+                            XmlSerializer serializer = new XmlSerializer(typeof(aoc.CivilCaseType));
+                            serializer.Serialize(fs, response.CaseResponseMessage.Case, namespaces);
                             fs.Flush();
                             fs.Close();
                         }
@@ -1263,6 +1264,41 @@ namespace AZServiceTest
                 }
             }
 
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                 string logFileFolder = @"c:\wcfTraces\";
+                VistaSG.Common.LogHelper log1 = new VistaSG.Common.LogHelper(logFileName:logFileFolder + @"\log1.log" , logLevelText:"INFO" , logName: "purgePendingFilingTaskLog" , rollingFile:true) ;
+                VistaSG.Common.LogHelper log2 = new VistaSG.Common.LogHelper(logFileName:logFileFolder + @"\log2.log" , logLevelText:"INFO" , logName: "orpushLog" , rollingFile:true) ;
+                VistaSG.Common.LogHelper log3 = new VistaSG.Common.LogHelper(logFileName: logFileFolder + @"\log3.log", logLevelText: "INFO", logName: "orpullLog", rollingFile: true);
+                for (int i = 0; i < 10000; i++)
+                {
+                    log1.LogToTrace(TraceEventType.Information, string.Format("LOG1 Line # {0} ", i));
+                    log2.LogToTrace(TraceEventType.Information, string.Format("LOG2 Line # {0} ", i));
+                    log3.LogToTrace(TraceEventType.Information, string.Format("LOG3 Line # {0} ", i));
+                }
+                log1.CloseLog();
+                for (int i = 10001; i < 20000; i++)
+                {
+                    log2.LogToTrace(TraceEventType.Information, string.Format("LOG2 Line # {0} ", i));
+                    log3.LogToTrace(TraceEventType.Information, string.Format("LOG3 Line # {0} ", i));
+                }
+                log2.CloseLog();
+                for (int i = 20001; i < 30000; i++)
+                {
+                    log3.LogToTrace(TraceEventType.Information, string.Format("LOG3 Line # {0} ", i));
+                }
+
+                log3.CloseLog();
+                MessageBox.Show("Done");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
 
     }

@@ -41,6 +41,7 @@
             this.button11 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxCaseNumber = new System.Windows.Forms.TextBox();
+            this.button12 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -170,11 +171,22 @@
             this.textBoxCaseNumber.Size = new System.Drawing.Size(270, 20);
             this.textBoxCaseNumber.TabIndex = 12;
             // 
+            // button12
+            // 
+            this.button12.Location = new System.Drawing.Point(86, 466);
+            this.button12.Name = "button12";
+            this.button12.Size = new System.Drawing.Size(329, 37);
+            this.button12.TabIndex = 13;
+            this.button12.Text = "Log4 Net Test";
+            this.button12.UseVisualStyleBackColor = true;
+            this.button12.Click += new System.EventHandler(this.button12_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(520, 441);
+            this.ClientSize = new System.Drawing.Size(520, 537);
+            this.Controls.Add(this.button12);
             this.Controls.Add(this.textBoxCaseNumber);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button11);
@@ -210,6 +222,7 @@
         private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxCaseNumber;
+        private System.Windows.Forms.Button button12;
     }
 }
 
