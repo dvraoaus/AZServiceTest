@@ -50,11 +50,11 @@
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.0\ExternalAssemblies\log4net.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.1\ExternalAssemblies\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Oasis.LegalXml.CourtFiling.v5.0, Version=5.0.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
+    <Reference Include="Oasis.LegalXml.CourtFiling.v5.1, Version=5.1.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.0\CompiledAssemblies\Oasis.LegalXml.CourtFiling.v5.0.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.1\CompiledAssemblies\Oasis.LegalXml.CourtFiling.v5.1.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />

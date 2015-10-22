@@ -42,6 +42,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBoxCaseNumber = new System.Windows.Forms.TextBox();
             this.button12 = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tbDocketId = new System.Windows.Forms.TextBox();
+            this.button13 = new System.Windows.Forms.Button();
+            this.button14 = new System.Windows.Forms.Button();
+            this.textBoxStatus = new System.Windows.Forms.TextBox();
+            this.tbAJACSCaseNumber = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -106,7 +113,7 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(25, 235);
+            this.button7.Location = new System.Drawing.Point(423, 225);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(211, 23);
             this.button7.TabIndex = 6;
@@ -116,7 +123,7 @@
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(270, 235);
+            this.button8.Location = new System.Drawing.Point(423, 254);
             this.button8.Name = "button8";
             this.button8.Size = new System.Drawing.Size(211, 23);
             this.button8.TabIndex = 7;
@@ -126,7 +133,7 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(25, 295);
+            this.button9.Location = new System.Drawing.Point(39, 313);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(211, 23);
             this.button9.TabIndex = 8;
@@ -173,7 +180,7 @@
             // 
             // button12
             // 
-            this.button12.Location = new System.Drawing.Point(86, 466);
+            this.button12.Location = new System.Drawing.Point(190, 18);
             this.button12.Name = "button12";
             this.button12.Size = new System.Drawing.Size(329, 37);
             this.button12.TabIndex = 13;
@@ -181,11 +188,81 @@
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(36, 437);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(69, 13);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "Document # ";
+            // 
+            // tbDocketId
+            // 
+            this.tbDocketId.Location = new System.Drawing.Point(111, 437);
+            this.tbDocketId.MaxLength = 50;
+            this.tbDocketId.Name = "tbDocketId";
+            this.tbDocketId.Size = new System.Drawing.Size(270, 20);
+            this.tbDocketId.TabIndex = 15;
+            // 
+            // button13
+            // 
+            this.button13.Location = new System.Drawing.Point(400, 437);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(119, 23);
+            this.button13.TabIndex = 16;
+            this.button13.Text = "Get Document";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
+            // 
+            // button14
+            // 
+            this.button14.Location = new System.Drawing.Point(111, 539);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(219, 23);
+            this.button14.TabIndex = 17;
+            this.button14.Text = "How many documents";
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
+            // 
+            // textBoxStatus
+            // 
+            this.textBoxStatus.Location = new System.Drawing.Point(44, 480);
+            this.textBoxStatus.Multiline = true;
+            this.textBoxStatus.Name = "textBoxStatus";
+            this.textBoxStatus.ReadOnly = true;
+            this.textBoxStatus.Size = new System.Drawing.Size(459, 44);
+            this.textBoxStatus.TabIndex = 18;
+            // 
+            // tbAJACSCaseNumber
+            // 
+            this.tbAJACSCaseNumber.Location = new System.Drawing.Point(121, 228);
+            this.tbAJACSCaseNumber.MaxLength = 50;
+            this.tbAJACSCaseNumber.Name = "tbAJACSCaseNumber";
+            this.tbAJACSCaseNumber.Size = new System.Drawing.Size(270, 20);
+            this.tbAJACSCaseNumber.TabIndex = 20;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(35, 231);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(80, 13);
+            this.label3.TabIndex = 19;
+            this.label3.Text = "AJACS Case # ";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(520, 537);
+            this.ClientSize = new System.Drawing.Size(729, 662);
+            this.Controls.Add(this.tbAJACSCaseNumber);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.textBoxStatus);
+            this.Controls.Add(this.button14);
+            this.Controls.Add(this.button13);
+            this.Controls.Add(this.tbDocketId);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.textBoxCaseNumber);
             this.Controls.Add(this.label1);
@@ -223,6 +300,13 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBoxCaseNumber;
         private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox tbDocketId;
+        private System.Windows.Forms.Button button13;
+        private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.TextBox textBoxStatus;
+        private System.Windows.Forms.TextBox tbAJACSCaseNumber;
+        private System.Windows.Forms.Label label3;
     }
 }
 

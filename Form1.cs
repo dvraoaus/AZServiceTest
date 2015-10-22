@@ -21,6 +21,9 @@ using System.Xml.Schema;
 using System.Xml.Linq;
 using azs = Arizona.Courts.Services.v20;
 using System.Diagnostics;
+using docQuery = Oasis.LegalXml.CourtFiling.v40.DocumentQuery;
+using docResponse = Oasis.LegalXml.CourtFiling.v40.DocumentResponse;
+
 namespace AZServiceTest
 {
     public partial class Form1 : Form
@@ -28,7 +31,8 @@ namespace AZServiceTest
         private const string DEFAULT_CONFIG_FILE = @".\AZCRMDE.config";
         private string _configFile = string.Empty;
         private const string PARTIAL_ACCEPTANCE = "PARTIAL";
-
+        private XmlSerializer _civilCaseSerializer = null;
+        private XmlSerializerNamespaces _civilCaseNamespaces = null;
         public Form1()
         {
             InitializeComponent();
@@ -149,6 +153,28 @@ namespace AZServiceTest
             }
         }
 
+
+       private docQuery.DocumentQueryMessageType SampleDocumentQuery
+        {
+            get
+            {
+                return new docQuery.DocumentQueryMessageType
+                {
+                    CaseTrackingID = new Niem.Proxy.xsd.v20.String(this.textBoxCaseNumber.Text.Trim()),
+                    CaseDocketID = new niemxsd.String(this.tbDocketId.Text.Trim()) ,
+                    CaseCourt = this.CaseCourt,
+                    QuerySubmitter = new Niem.NiemCore.v20.EntityType
+                    {
+                        EntityRepresentation = this.PersonAtKeyBoard,
+                        EntityRepresentationType = Niem.NiemCore.v20.EntityRepresentationTpes.EcfPerson
+                    },
+                    SendingMDELocationID = new nc.IdentificationType("FAMDE TEST"),
+                     SendingMDEProfileCode = amc.PolicyConstants.WEB_SERVICES_SIP_CODE 
+
+                };
+            }
+        }
+
         private ecf.PersonType PersonAtKeyBoard
         {
             get
@@ -229,16 +255,7 @@ namespace AZServiceTest
                     DialogResult dr = saveFileDialog.ShowDialog(this);
                     if (dr == DialogResult.OK)
                     {
-                        if (File.Exists(saveFileDialog.FileName)) File.Delete(saveFileDialog.FileName);
-                        using (var fs = new FileStream(saveFileDialog.FileName, FileMode.CreateNew, FileAccess.Write))
-                        {
-                            XmlSerializerNamespaces namespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
-                            ecf.EcfHelper.AddNameSpaces(namespaces);
-                            XmlSerializer serializer = new XmlSerializer(typeof(aoc.CivilCaseType));
-                            serializer.Serialize(fs, response.CaseResponseMessage.Case, namespaces);
-                            fs.Flush();
-                            fs.Close();
-                        }
+                        SaveGetCaseResponse(response, saveFileDialog.FileName);
                         MessageBox.Show(
                             string.Format("Saved GetCase Response to {0}", saveFileDialog.FileName), "Save");
                     }
@@ -257,6 +274,28 @@ namespace AZServiceTest
                     saveFileDialog = null;
                 }
 
+            }
+        }
+
+        private void SaveGetCaseResponse(wmp.GetCaseResponse response, string fileName)
+        {
+            if (response != null && !string.IsNullOrWhiteSpace(fileName))
+            {
+
+                if (_civilCaseSerializer == null)
+                {
+                    _civilCaseNamespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
+                    ecf.EcfHelper.AddNameSpaces(_civilCaseNamespaces);
+                    _civilCaseSerializer = new XmlSerializer(typeof(aoc.CivilCaseType));
+
+                }
+                if (File.Exists(fileName)) File.Delete(fileName);
+                using (var fs = new FileStream(fileName, FileMode.CreateNew, FileAccess.Write))
+                {
+                    _civilCaseSerializer.Serialize(fs, response.CaseResponseMessage.Case, _civilCaseNamespaces);
+                    fs.Flush();
+                    fs.Close();
+                }
             }
         }
 
@@ -775,6 +814,7 @@ namespace AZServiceTest
                     List<aoc.RecordDocketingMessageType> docketingMessages = rfr.AZRecordFilingRequest.RecordDocketingMessage;
                     List<aoc.RecordDocketingCallbackMessageType> recordDocketingCallBackMessages = new List<aoc.RecordDocketingCallbackMessageType>();
                     aoc.CivilCaseType civilCase = filingMessage.Case != null ? filingMessage.Case as aoc.CivilCaseType : null;
+                    string ajacsCaseNumber = !string.IsNullOrWhiteSpace(this.tbAJACSCaseNumber.Text) ? this.tbAJACSCaseNumber.Text.Trim() : "P1300CV000800";
                     if (civilCase != null && !string.IsNullOrWhiteSpace(statusCode) && 
                          ( statusCode.Equals(amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED, StringComparison.OrdinalIgnoreCase) ||
                            statusCode.Equals(PARTIAL_ACCEPTANCE, StringComparison.OrdinalIgnoreCase)
@@ -782,7 +822,7 @@ namespace AZServiceTest
 
                         )
                     {
-                        civilCase.CaseTrackingID = new List<niemxsd.String> { new niemxsd.String("P1300CV000800") };
+                        civilCase.CaseTrackingID = new List<niemxsd.String> { new niemxsd.String(ajacsCaseNumber) };
                     }
                     // Generate Call Back Message
                     aoc.RecordDocketingCallbackMessageType recordDocketingCallBack = null;
@@ -1299,6 +1339,168 @@ namespace AZServiceTest
             {
                 MessageBox.Show(ex.ToString());
             }
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            azs.ICourtRecordMDE _serviceChannel = null;
+
+            try
+            {
+                _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<azs.ICourtRecordMDE>
+                    (
+                        "CourtRecordMDEService",
+                        _configFile
+                    );
+
+                wmp.GetDocumentRequest request = new wmp.GetDocumentRequest
+                (
+                      new amc.GetDocumentRequestType { DocumentQueryMessage = this.SampleDocumentQuery }
+                );
+                wmp.GetDocumentResponse response = _serviceChannel.GetDocument(request);
+                
+                Save(response);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (_serviceChannel != null && _serviceChannel is IClientChannel)
+                {
+                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
+                }
+
+            }
+
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            azs.ICourtRecordMDE _serviceChannel = null;
+            VistaSG.Common.LogHelper log1 = null;
+            try
+            {
+                string logFileFolder = @"C:\Changes\Arizona\DocTest\";
+                log1 = new VistaSG.Common.LogHelper(logFileName: logFileFolder + @"\doctest.log", logLevelText: "INFO", logName: "docTest", rollingFile: true);
+                
+                _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<azs.ICourtRecordMDE>
+                    (
+                        "CourtRecordMDEService",
+                        _configFile
+                    );
+
+                wmp.GetCaseRequest getCaserequest = new wmp.GetCaseRequest
+                (
+                      new amc.GetCaseRequestType { CaseQueryMessage = this.SampleCaseQuery }
+                );
+                wmp.GetDocumentRequest getDocumentrequest = new wmp.GetDocumentRequest
+                (
+                      new amc.GetDocumentRequestType { DocumentQueryMessage = this.SampleDocumentQuery }
+                );
+
+                int numberOfDocumentsAvailable = 0;
+                int numberOfDocumentsNotAvailable = 0;
+                int numberOfCases = 0;
+                for (int i = 412; i < 413; i++)
+                {
+                    string caseNumber = string.Format("P1300CV2014{0}", i.ToString().PadLeft(5, '0'));
+                    this.textBoxStatus.Text = string.Format("Fetching Case Information for {0}", caseNumber);
+                    Application.DoEvents();
+                    getCaserequest.CaseQueryMessage.CaseTrackingID = new niemxsd.String(caseNumber);
+                    DateTime startTime = DateTime.Now;
+                    wmp.GetCaseResponse response = _serviceChannel.GetCase(getCaserequest);
+                    string getCaseResponseFileName = Path.Combine(logFileFolder, string.Format("{0}.xml", caseNumber));
+                    SaveGetCaseResponse(response, getCaseResponseFileName);
+                    log1.LogToTrace(TraceEventType.Information, string.Format( "Fetched Case Information for {0} in {1} Milli Seconds" , caseNumber , DateTime.Now.Subtract(startTime).TotalMilliseconds));
+                    if (response != null && response.CaseResponseMessage != null && response.CaseResponseMessage.Case != null && response.CaseResponseMessage.Case is aoc.CivilCaseType )
+                    {
+                        aoc.CivilCaseType civilCase = response.CaseResponseMessage.Case as aoc.CivilCaseType;
+                        numberOfCases++;
+                        if (civilCase.CaseAugmentation != null && civilCase.CaseAugmentation.CaseCourtEvent != null)
+                        {
+                            foreach (var ccevent in civilCase.CaseAugmentation.CaseCourtEvent)
+                            {
+                                if (ccevent is ecf.CourtEventType)
+                                {
+                                    string documentId = string.Empty ;
+                                    ecf.CourtEventType ecfCourtEvent = ccevent as ecf.CourtEventType;
+                                    if (ecfCourtEvent != null &&
+                                         ecfCourtEvent.CourtEventDocument != null &&
+                                         ecfCourtEvent.CourtEventDocument.DocumentRendition != null &&
+                                         ecfCourtEvent.CourtEventDocument.DocumentRendition.Count > 0 &&
+                                         ecfCourtEvent.CourtEventDocument.DocumentRendition[0].DocumentIdentification != null  
+
+                                        )
+                                    {
+                                        documentId = ecf.EcfHelper.GetIdentificationValue(ecfCourtEvent.CourtEventDocument.DocumentRendition[0].DocumentIdentification , "SourceDocumentID");
+                                    }
+                                    byte[] documentImage = null;
+                                    if ( !string.IsNullOrWhiteSpace(documentId))
+                                    {
+                                        this.textBoxStatus.Text = string.Format("Fetching Document {0} SourceDocumentId {1}", caseNumber , documentId);
+                                        Application.DoEvents();
+                                        getDocumentrequest.DocumentQueryMessage.CaseTrackingID = new niemxsd.String(caseNumber);
+                                        getDocumentrequest.DocumentQueryMessage.CaseDocketID = new niemxsd.String(documentId);
+                                        startTime = DateTime.Now;
+                                        wmp.GetDocumentResponse documentResponse = _serviceChannel.GetDocument(getDocumentrequest);
+                                        if (documentResponse != null && documentResponse.DocumentResponseMessage != null && documentResponse.DocumentResponseMessage.IsSuccessfull && documentResponse.DocumentResponseMessage.Document != null && documentResponse.DocumentResponseMessage.Document.DocumentImage != null )
+                                        {
+                                            documentImage = documentResponse.DocumentResponseMessage.Document.DocumentImage;
+                                            log1.LogToTrace(TraceEventType.Information, string.Format("Fetched Document {0} SourceDocumentId {1} Image Size {3} in {2} Milli Seconds", caseNumber, documentId, DateTime.Now.Subtract(startTime).TotalMilliseconds , documentImage.Length));
+                                        }
+                                        else if (documentResponse != null && documentResponse.DocumentResponseMessage != null && documentResponse.DocumentResponseMessage.IsSuccessfull == false )
+                                        {
+                                            string errorCode = string.Empty;
+                                            string errorText = string.Empty;
+                                            if (documentResponse.DocumentResponseMessage.Error != null && documentResponse.DocumentResponseMessage.Error.Count > 0)
+                                            {
+                                                errorCode = documentResponse.DocumentResponseMessage.Error[0].ErrorCode.ToString();
+                                                errorText = documentResponse.DocumentResponseMessage.Error[0].ErrorText.ToString();
+
+                                            }
+                                            log1.LogToTrace(TraceEventType.Information, string.Format("Fetched Document {0} SourceDocumentId {1} Error Code {3} Error Text {4} in {2} Milli Seconds", caseNumber, documentId, DateTime.Now.Subtract(startTime).TotalMilliseconds, errorCode , errorText  ));
+                                        }
+
+                                    }
+
+                                    if (documentImage != null && documentImage.Length > 0)
+                                    {
+                                        numberOfDocumentsAvailable++;
+                                    }
+                                    else
+                                    {
+                                        numberOfDocumentsNotAvailable++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+                string infoMessage = string.Format("# Cases {0} # Documents Present {1} # Documents Not Present {2}", numberOfCases, numberOfDocumentsAvailable, numberOfDocumentsNotAvailable);
+                log1.LogToTrace(TraceEventType.Information, infoMessage);
+                MessageBox.Show(infoMessage , "Done");
+             
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (_serviceChannel != null && _serviceChannel is IClientChannel)
+                {
+                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
+                }
+                if (log1 != null)
+                {
+                    log1.CloseLog();
+                }
+            }
+
+
         }
 
     }
