@@ -59,6 +59,7 @@
             this.button1.TabIndex = 0;
             this.button1.Text = "Get Document";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
@@ -79,6 +80,7 @@
             this.button3.TabIndex = 2;
             this.button3.Text = "Submit Filing";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Visible = false;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button4
@@ -89,6 +91,7 @@
             this.button4.TabIndex = 3;
             this.button4.Text = "Submit Filing from File AZ";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Visible = false;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // button5
@@ -99,6 +102,7 @@
             this.button5.TabIndex = 4;
             this.button5.Text = "Submit Filing from File FL";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Visible = false;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // button6
@@ -139,6 +143,7 @@
             this.button9.TabIndex = 8;
             this.button9.Text = "Submit Accept all Even From RVFR";
             this.button9.UseVisualStyleBackColor = true;
+            this.button9.Visible = false;
             this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // button10
@@ -149,6 +154,7 @@
             this.button10.TabIndex = 9;
             this.button10.Text = "Deserialize AOC Implementation of CivilCase";
             this.button10.UseVisualStyleBackColor = true;
+            this.button10.Visible = false;
             this.button10.Click += new System.EventHandler(this.button10_Click);
             // 
             // button11
@@ -159,6 +165,7 @@
             this.button11.TabIndex = 10;
             this.button11.Text = "Validate AOC Implementation of CivilCase";
             this.button11.UseVisualStyleBackColor = true;
+            this.button11.Visible = false;
             this.button11.Click += new System.EventHandler(this.button11_Click);
             // 
             // label1
@@ -186,6 +193,7 @@
             this.button12.TabIndex = 13;
             this.button12.Text = "Log4 Net Test";
             this.button12.UseVisualStyleBackColor = true;
+            this.button12.Visible = false;
             this.button12.Click += new System.EventHandler(this.button12_Click);
             // 
             // label2

@@ -738,6 +738,12 @@ namespace AZServiceTest
                     }
                     core.CoreFilingMessageType coreFilingMessage = reviewFilingRequest != null ? reviewFilingRequest.CoreFilingMessage : null;
                     aoc.CoreFilingMessageType filingMessage = coreFilingMessage != null && coreFilingMessage is aoc.CoreFilingMessageType ? coreFilingMessage as aoc.CoreFilingMessageType : null;
+                    
+                    List<nc.EntityType> filingParties = ecf.EcfHelper.GetCaseInitiatingParties(filingCase: filingMessage.Case, expandReferences: true, coreFilingMessage: filingMessage);
+                    if (filingParties != null)
+                    {
+                        MessageBox.Show("# Filing Parties " + filingParties.Count);
+                    }
                     if (filingMessage != null)
                     {
                         DateTime? postTime = null;
@@ -1503,5 +1509,148 @@ namespace AZServiceTest
 
         }
 
+        private List<string> GetFilingPartyIds(aoc.CoreFilingMessageType filingMessage)
+        {
+            List<string> filingPartyIds = new List<string>();
+            // FilingMessageHelper filingMessageHelper = new FilingMessageHelper();
+            aoc.CivilCaseType civilCase = filingMessage != null && filingMessage.Case != null && filingMessage.Case is aoc.CivilCaseType ? filingMessage.Case as aoc.CivilCaseType : null; // 
+            aoc.CaseAugmentationType ecfCaseAugmentation = civilCase != null && civilCase.EcfCaseAugmentation != null && civilCase.EcfCaseAugmentation is aoc.CaseAugmentationType ? civilCase.EcfCaseAugmentation as aoc.CaseAugmentationType  : null;
+            j.CaseAugmentationType caseAugmentation = civilCase != null && civilCase.CaseAugmentation != null ? civilCase.CaseAugmentation : null;
+            if (filingMessage != null &&
+                civilCase != null &&
+                ecfCaseAugmentation != null &&
+                caseAugmentation != null
+                )
+            {
+                // Now Filing Parties
+                if (caseAugmentation.CaseInitiatingParty != null &&
+                    caseAugmentation.CaseInitiatingParty.Count > 0
+                    )
+                {
+                    foreach (var cip in caseAugmentation.CaseInitiatingParty)
+                    {
+                        if (cip.EntityRepresentation != null &&
+                             cip.EntityRepresentation is ReferenceType &&
+                             (cip.EntityRepresentationType == nc.EntityRepresentationTpes.EntityPersonReference ||
+                               cip.EntityRepresentationType == nc.EntityRepresentationTpes.EntityOrganizationReference
+                              ) &&
+                              !string.IsNullOrWhiteSpace((cip.EntityRepresentation as ReferenceType).Ref)
+                           )
+                        {
+                            string participantId = (cip.EntityRepresentation as ReferenceType).Ref;
+
+                            filingPartyIds.Add(participantId);
+                        }
+                    }
+                }
+
+            }
+            return filingPartyIds;
+        }
+
+        /*
+        private List<nc.EntityType> GetCaseInitiatingParties1(object filingCase, bool expandReferences, core.CoreFilingMessageType coreFilingMessage)
+        {
+            List<nc.EntityType> initiatingParties = null;
+            Niem.Domains.Jxdm.v40.CaseAugmentationType caseAugmentation = ecf.EcfHelper.GetCaseAugmentation(filingCase);
+            if (caseAugmentation != null)
+            {
+                initiatingParties = expandReferences ? ExpandEntityReferences1(caseAugmentation.CaseInitiatingParty, filingCase, coreFilingMessage) : caseAugmentation.CaseInitiatingParty;
+            }
+            return initiatingParties;
+        }
+
+        private List<nc.EntityType> ExpandEntityReferences1(List<nc.EntityType> niemEntities, object filingCase, core.CoreFilingMessageType coreFilingMessage)
+        {
+            List<nc.EntityType> expandedEntities = new List<nc.EntityType>();
+            if (niemEntities != null && niemEntities.Count > 0)
+            {
+
+                List<nc.EntityType> filingSubmitters = (coreFilingMessage != null && coreFilingMessage.DocumentSubmitter != null) ? coreFilingMessage.DocumentSubmitter : null;
+                ecf.CaseAugmentationType ecfCaseAugmentation = ecf.EcfHelper. GetEcfCaseAugmentation(filingCase);
+                List<ecf.CaseParticipantType> caseParticipants = ecfCaseAugmentation != null && ecfCaseAugmentation.CaseParticipant != null && ecfCaseAugmentation.CaseParticipant.Count > 0 ? ecfCaseAugmentation.CaseParticipant : null;
+
+                foreach (var niemEntity in niemEntities)
+                {
+                    Niem.Structures.v20.ReferenceType entiryReference = null;
+                    switch (niemEntity.EntityRepresentationType)
+                    {
+                        case nc.EntityRepresentationTpes.EcfOrganization:
+                        case nc.EntityRepresentationTpes.EcfPerson:
+                        case nc.EntityRepresentationTpes.EntityPerson:
+                        case nc.EntityRepresentationTpes.EntityOrganization:
+                            expandedEntities.Add(niemEntity);
+                            break;
+                        case nc.EntityRepresentationTpes.EntityPersonReference:
+                            entiryReference = niemEntity.EntityRepresentation as Niem.Structures.v20.ReferenceType;
+                            Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType ecfPerson = null;
+                            if (entiryReference != null && !string.IsNullOrEmpty(entiryReference.Ref))
+                            {
+                                // first look under case participants
+                                if (caseParticipants != null && caseParticipants.Count > 0)
+                                {
+                                    ecf.CaseParticipantType matchingCaseParticipant = caseParticipants.Find(cp => (cp.EntityRepresentationType == nc.EntityRepresentationTpes.EcfPerson && (cp.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType).Id.Equals(entiryReference.Ref)));
+                                    if (matchingCaseParticipant != null) ecfPerson = matchingCaseParticipant.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType;
+                                }
+                                if (ecfPerson == null && filingSubmitters != null && filingSubmitters.Count > 0)
+                                {
+                                    nc.EntityType matchingEntity = filingSubmitters.Find(et => (et.EntityRepresentationType == nc.EntityRepresentationTpes.EcfPerson && (et.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType).Id.Equals(entiryReference.Ref)));
+                                    if (matchingEntity != null) ecfPerson = matchingEntity.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType;
+                                }
+                            }
+                            if (ecfPerson != null)
+                            {
+                                expandedEntities.Add(new nc.EntityType { EntityRepresentation = ecfPerson, EntityRepresentationType = nc.EntityRepresentationTpes.EcfPerson });
+                            }
+                            break;
+                        case nc.EntityRepresentationTpes.EntityOrganizationReference:
+                            entiryReference = niemEntity.EntityRepresentation as Niem.Structures.v20.ReferenceType;
+                            object entityOrganization = null;
+                            if (entiryReference != null && !string.IsNullOrEmpty(entiryReference.Ref))
+                            {
+                                // first look under case participants
+                                if (caseParticipants != null && caseParticipants.Count > 0)
+                                {
+                                    ecf.CaseParticipantType matchingCaseParticipant = caseParticipants.Find(cp => (cp.EntityRepresentationType == nc.EntityRepresentationTpes.EcfOrganization && (cp.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.OrganizationType).Id.Equals(entiryReference.Ref)));
+                                    if (matchingCaseParticipant != null) entityOrganization = matchingCaseParticipant.EntityRepresentation as ecf.OrganizationType;
+                                    if (entityOrganization == null)
+                                    {
+                                        matchingCaseParticipant = caseParticipants.Find(cp => (cp.EntityRepresentationType == nc.EntityRepresentationTpes.AZAOCOrganization && (cp.EntityRepresentation as aoc.OrganizationType).Id.Equals(entiryReference.Ref)));
+                                        if (matchingCaseParticipant != null) entityOrganization = matchingCaseParticipant.EntityRepresentation as aoc.OrganizationType;
+
+                                    }
+                                }
+                                if (entityOrganization == null && filingSubmitters != null && filingSubmitters.Count > 0)
+                                {
+                                    nc.EntityType matchingEntity = filingSubmitters.Find(et => (et.EntityRepresentationType == nc.EntityRepresentationTpes.EcfOrganization && (et.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.OrganizationType).Id.Equals(entiryReference.Ref)));
+                                    if (matchingEntity != null) entityOrganization = matchingEntity.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.OrganizationType;
+                                    if (entityOrganization == null)
+                                    {
+                                        matchingEntity = filingSubmitters.Find(et => (et.EntityRepresentationType == nc.EntityRepresentationTpes.AZAOCOrganization && (et.EntityRepresentation as aoc.OrganizationType).Id.Equals(entiryReference.Ref)));
+                                        if (matchingEntity != null) entityOrganization = matchingEntity.EntityRepresentation as aoc.OrganizationType;
+                                    }
+
+                                }
+                            }
+                            if (entityOrganization != null)
+                            {
+                                if (entityOrganization is ecf.OrganizationType)
+                                {
+                                    expandedEntities.Add(new nc.EntityType { EntityRepresentation = entityOrganization, EntityRepresentationType = nc.EntityRepresentationTpes.EcfOrganization });
+                                }
+                                else if (entityOrganization is aoc.OrganizationType)
+                                {
+                                    expandedEntities.Add(new nc.EntityType { EntityRepresentation = entityOrganization, EntityRepresentationType = nc.EntityRepresentationTpes.AZAOCOrganization});
+                                }
+
+                            }
+
+                            break;
+                    }
+                }
+            }
+            return expandedEntities;
+        }
+        */
     }
 }
