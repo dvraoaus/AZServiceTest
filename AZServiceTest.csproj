@@ -50,17 +50,19 @@
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.2\ExternalAssemblies\log4net.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.3.5\ExternalAssemblies\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Oasis.LegalXml.CourtFiling.v5.2, Version=5.2.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
+    <Reference Include="Oasis.LegalXml.CourtFiling.v5.3.5, Version=5.3.5.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.2\CompiledAssemblies\Oasis.LegalXml.CourtFiling.v5.2.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.3.5\CompiledAssemblies\Oasis.LegalXml.CourtFiling.v5.3.5.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
