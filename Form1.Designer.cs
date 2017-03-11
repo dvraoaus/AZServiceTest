@@ -55,6 +55,7 @@
             this.tbOverPaymentAmount = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
+            this.buttonChangeDocumentType = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button1
@@ -326,11 +327,22 @@
             this.label5.Size = new System.Drawing.Size(0, 13);
             this.label5.TabIndex = 907;
             // 
+            // buttonChangeDocumentType
+            // 
+            this.buttonChangeDocumentType.Location = new System.Drawing.Point(64, 351);
+            this.buttonChangeDocumentType.Name = "buttonChangeDocumentType";
+            this.buttonChangeDocumentType.Size = new System.Drawing.Size(439, 23);
+            this.buttonChangeDocumentType.TabIndex = 908;
+            this.buttonChangeDocumentType.Text = "Remove First Apperance Fee and Change to AFFIDAVIT OF RENEWAL OF JUDGMENT";
+            this.buttonChangeDocumentType.UseVisualStyleBackColor = true;
+            this.buttonChangeDocumentType.Click += new System.EventHandler(this.buttonChangeDocumentType_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(729, 662);
+            this.Controls.Add(this.buttonChangeDocumentType);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.tbOverPaymentAmount);
             this.Controls.Add(this.label4);
@@ -395,6 +407,7 @@
         private System.Windows.Forms.TextBox tbOverPaymentAmount;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button buttonChangeDocumentType;
     }
 }
 

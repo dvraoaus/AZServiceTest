@@ -815,7 +815,8 @@ namespace AZServiceTest
                         filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED, 
                         filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED ,
                         netZeroSubmission: false ,
-                        overPaymentAmount : 0.00M
+                        overPaymentAmount : 0.00M ,
+                        changeDocumentType : false
                     );
                 if (ndcRequest != null)
                 {
@@ -845,7 +846,7 @@ namespace AZServiceTest
             }
        }
 
-        private wmp.NotifyDocketingCompleteRequest GetNDC(string documentStatusCode , string documentStatusDescription , string filingStatusCode , string filingStatusDescription , bool netZeroSubmission, decimal overPaymentAmount)
+        private wmp.NotifyDocketingCompleteRequest GetNDC(string documentStatusCode , string documentStatusDescription , string filingStatusCode , string filingStatusDescription , bool netZeroSubmission, decimal overPaymentAmount , bool changeDocumentType)
         {
             wmp.NotifyDocketingCompleteRequest ndcRequest = null;
 
@@ -857,10 +858,10 @@ namespace AZServiceTest
                     List<aoc.RecordDocketingMessageType> docketingMessages = rfr.AZRecordFilingRequest.RecordDocketingMessage;
                     List<aoc.RecordDocketingCallbackMessageType> recordDocketingCallBackMessages = new List<aoc.RecordDocketingCallbackMessageType>();
 
-                nc.CaseType callBackCase = new nc.CaseType();
-                    aoc.CivilCaseType civilCase = filingMessage.Case != null ? filingMessage.Case as aoc.CivilCaseType : null;
+                    nc.CaseType callBackCase = new nc.CaseType();
+                    aoc.CivilCaseType aocCivilCase = filingMessage.Case != null ? filingMessage.Case as aoc.CivilCaseType : null;
                     string ajacsCaseNumber = !string.IsNullOrWhiteSpace(this.tbAJACSCaseNumber.Text) ? this.tbAJACSCaseNumber.Text.Trim() : "P1300CV000800";
-                    if (civilCase != null && !string.IsNullOrWhiteSpace(filingStatusCode) && 
+                    if (aocCivilCase != null && !string.IsNullOrWhiteSpace(filingStatusCode) && 
                          (filingStatusCode.Equals(amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED, StringComparison.OrdinalIgnoreCase) ||
                            filingStatusCode.Equals(PARTIAL_ACCEPTANCE, StringComparison.OrdinalIgnoreCase) ||
                            filingStatusCode.Equals(amc.PolicyConstants.FILING_STATUS_NET_ZERO, StringComparison.OrdinalIgnoreCase)
@@ -868,10 +869,10 @@ namespace AZServiceTest
 
                         )
                     {
-                        civilCase.CaseTrackingID = new List<niemxsd.String> { new niemxsd.String(ajacsCaseNumber) };
-                    callBackCase.CaseTrackingID = new List<niemxsd.String> { new niemxsd.String(ajacsCaseNumber) };
-                        callBackCase.CaseTitleText = civilCase.CaseTitleText;
-                    callBackCase.CaseCategoryText = civilCase.CaseCategoryText;
+                        aocCivilCase.CaseTrackingID = new List<niemxsd.String> { new niemxsd.String(ajacsCaseNumber) };
+                        callBackCase.CaseTrackingID = new List<niemxsd.String> { new niemxsd.String(ajacsCaseNumber) };
+                        callBackCase.CaseTitleText = aocCivilCase.CaseTitleText;
+                        callBackCase.CaseCategoryText = aocCivilCase.CaseCategoryText;
                     }
                     // Generate Call Back Message
                     aoc.RecordDocketingCallbackMessageType recordDocketingCallBack = null;
@@ -913,12 +914,12 @@ namespace AZServiceTest
                             DocumentInformationCutOffDate = filingMessage.DocumentInformationCutOffDate,
                             DocumentSubmitter = filingMessage.DocumentSubmitter,
                             SendingMDELocationID = new nc.IdentificationType("CRMDE ADDRESS"),
-                            SendingMDEProfileCode = Niem.NiemCore.v20.Constants.ECF4_WEBSERVICES_SIP_CODE,
+                            SendingMDEProfileCode = nc.Constants.ECF4_WEBSERVICES_SIP_CODE,
                             FilingStatus = filingStatus,
                             ReviewedLeadDocument = dm.ReviewedLeadDocument,
                             ReviewedConnectedDocument = dm.ReviewedConnectedDocument,
-                            Case = civilCase,
-                            CaseTypeSelection = ecf.CaseTypeSelectionType.CivilCase
+                            Case = callBackCase,
+                            CaseTypeSelection = ecf.CaseTypeSelectionType.NiemCase
                         };
                         recordDocketingCallBackMessages.Add(recordDocketingCallBack);
 
@@ -956,6 +957,40 @@ namespace AZServiceTest
 
                 }
 
+                if (changeDocumentType && paymentMessage != null && paymentMessage.AllowanceCharge != null && paymentMessage.AllowanceCharge.Count > 0)
+                {
+                    List<aoc.AllowanceChargeType> deleteList = new List<aoc.AllowanceChargeType>();
+                    foreach (aoc.AllowanceChargeType charge in paymentMessage.AllowanceCharge)
+                    {
+                        string summaryDescription = charge.AllowanceChargeCategoryCode != null && !string.IsNullOrEmpty(charge.AllowanceChargeCategoryCode.Value) ? charge.AllowanceChargeCategoryCode.Value : string.Empty;
+                        string chargeId = charge.ID != null && !string.IsNullOrWhiteSpace(charge.ID.Value) ? charge.ID.Value : string.Empty;
+                        if (!string.IsNullOrWhiteSpace(chargeId) &&
+                             chargeId.Equals("P2", StringComparison.OrdinalIgnoreCase) &&
+                            summaryDescription.Equals(amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE, StringComparison.OrdinalIgnoreCase))
+                        {
+                            deleteList.Add(charge);
+                        }
+                    }
+                    foreach (var charge in deleteList)
+                    {
+                        paymentMessage.AllowanceCharge.Remove(charge);
+                    }
+                    aoc.AllowanceChargeType changedCharge = new aoc.AllowanceChargeType
+                    {
+                         ID = new UBL21.cbc.IDType {  Value = ecf.EcfHelper.UUID } ,
+                         ChargeIndicator = new UBL21.cbc.ChargeIndicatorType { Value = true } ,
+                         AllowanceChargeReasonCode = new UBL21.cbc.AllowanceChargeReasonCodeType {  Value  = "AFRJ" } ,
+                         AllowanceChargeReason = new List<UBL21.cbc.AllowanceChargeReasonType> { new UBL21.cbc.AllowanceChargeReasonType { Value = "AFFIDAVIT OF RENEWAL OF JUDGMENT" }  }   ,
+                         MultiplierFactorNumeric = new UBL21.cbc.MultiplierFactorNumericType {  Value = 1} ,
+                         PrepaidIndicator = new UBL21.cbc.PrepaidIndicatorType {  Value = false} ,
+                         SequenceNumeric = new UBL21.cbc.SequenceNumericType {  Value = paymentMessage.AllowanceCharge.Count + 1  } ,
+                         Amount = new UBL21.cbc.AmountType {  Value = 27.00M},
+                         BaseAmount  = new UBL21.cbc.BaseAmountType {  Value = 27.00M} ,
+                         AllowanceChargeCategoryCode = new nc.TextType {  Value = amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE }
+                    };
+
+                    paymentMessage.AllowanceCharge.Add(changedCharge);
+                }
 
 
                 ndcRequest = new wmp.NotifyDocketingCompleteRequest
@@ -1053,7 +1088,7 @@ namespace AZServiceTest
                 {
                     aoc.CoreFilingMessageType filingMessage = rvfrRequest.CoreFilingMessage as aoc.CoreFilingMessageType;
                     aoc.PaymentMessageType paymentMessage = rvfrRequest.PaymentMessage;
-                    aoc.CivilCaseType civilCase = filingMessage.Case != null && filingMessage.Case is aoc.CivilCaseType ? filingMessage.Case as aoc.CivilCaseType : null;
+
                     List<aoc.RecordDocketingMessageType> docketingMessages = new List<aoc.RecordDocketingMessageType>();
                     DateTime rfrPostDate = DateTime.Now;
                     string documentReviwerId = string.Empty;
@@ -1114,7 +1149,7 @@ namespace AZServiceTest
                                 DocumentSubmitter = documentReviwer,
                                 SendingMDELocationID = new nc.IdentificationType("http://az.gov/FRMDE:xxxx"),
                                 SendingMDEProfileCode = "urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:WebServicesProfile-2.0",
-                                CaseCourt = civilCase != null && civilCase.CaseAugmentation != null && civilCase.CaseAugmentation.CaseCourt.Count > 0 ? civilCase.CaseAugmentation.CaseCourt[0] : null,
+                                // CaseCourt = civilCase != null && civilCase.CaseAugmentation != null && civilCase.CaseAugmentation.CaseCourt.Count > 0 ? civilCase.CaseAugmentation.CaseCourt[0] : null,
                                 ReviewedLeadDocument = new aoc.ReviewedDocumentType
                                 {
                                     Id = reviewedDocumentId,
@@ -1235,7 +1270,8 @@ namespace AZServiceTest
                         filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_REJECTED ,
                         filingStatusDescription: "DO NOT HAVE TO GIVE YOU A REASON" ,
                         netZeroSubmission:false ,
-                        overPaymentAmount:0.00M
+                        overPaymentAmount:0.00M ,
+                        changeDocumentType : false
                     );
                 if (ndcRequest != null)
                 {
@@ -1618,7 +1654,8 @@ namespace AZServiceTest
                         filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
                         filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED ,
                         netZeroSubmission:true ,
-                        overPaymentAmount:0.00M
+                        overPaymentAmount:0.00M ,
+                        changeDocumentType:false
                     );
                 if (ndcRequest != null)
                 {
@@ -1775,7 +1812,8 @@ namespace AZServiceTest
                             filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
                             filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
                             netZeroSubmission: false,
-                            overPaymentAmount: overPaymentAmount
+                            overPaymentAmount: overPaymentAmount ,
+                            changeDocumentType : false 
                         );
                     if (ndcRequest != null)
                     {
@@ -1794,6 +1832,52 @@ namespace AZServiceTest
                 {
                     MessageBox.Show("Over payment amount is required", "error");
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (_serviceChannel != null && _serviceChannel is IClientChannel)
+                {
+                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
+                }
+
+
+            }
+
+        }
+
+        private void buttonChangeDocumentType_Click(object sender, EventArgs e)
+        {
+            wmp.IFilingReviewMDE _serviceChannel = null;
+            try
+            {
+                decimal overPaymentAmount = 0.00M;
+                    wmp.NotifyDocketingCompleteRequest ndcRequest = this.GetNDC
+                        (
+                            documentStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            documentStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            netZeroSubmission: false,
+                            overPaymentAmount: overPaymentAmount ,
+                            changeDocumentType:true
+                        );
+                    if (ndcRequest != null)
+                    {
+                        _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<wmp.IFilingReviewMDE>
+                            (
+                                "FilingReviewMDEService",
+                                _configFile
+                            );
+
+                        wmp.NotifyDocketingCompleteResponse response = _serviceChannel.NotifyDocketingComplete(ndcRequest);
+                        Save(response);
+
+                    }
+
             }
             catch (Exception ex)
             {
