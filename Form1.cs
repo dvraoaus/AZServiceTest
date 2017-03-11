@@ -850,7 +850,9 @@ namespace AZServiceTest
         {
             wmp.NotifyDocketingCompleteRequest ndcRequest = null;
 
-            wmp.RecordFilingRequest rfr = this.GetRfrFromRvfr(documentStatusCode, documentStatusDescription);
+            List<nc.EntityType> documentReviwer = null;
+            List<nc.EntityType> documentReviwerAsReference = null;
+            wmp.RecordFilingRequest rfr = this.GetRfrFromRvfr(documentStatusCode, documentStatusDescription , documentReviwer:out documentReviwer, documentReviwerAsReference:out documentReviwerAsReference);
             if (rfr != null)
             {
                     aoc.CoreFilingMessageType filingMessage = rfr.AZRecordFilingRequest.CoreFilingMessage;
@@ -912,7 +914,7 @@ namespace AZServiceTest
                             DocumentPostDate = filingMessage.DocumentPostDate,
                             DocumentReceivedDate = filingMessage.DocumentReceivedDate,
                             DocumentInformationCutOffDate = filingMessage.DocumentInformationCutOffDate,
-                            DocumentSubmitter = filingMessage.DocumentSubmitter,
+                            DocumentSubmitter = documentNumber == 1 ?  documentReviwer : documentReviwerAsReference,
                             SendingMDELocationID = new nc.IdentificationType("CRMDE ADDRESS"),
                             SendingMDEProfileCode = nc.Constants.ECF4_WEBSERVICES_SIP_CODE,
                             FilingStatus = filingStatus,
@@ -1032,7 +1034,7 @@ namespace AZServiceTest
                             );
             reviewer.PersonOtherIdentification = new List<nc.IdentificationType>
                     {
-                        new nc.IdentificationType("1415" , amc.PolicyConstants.REVIEWREFMUSERID)
+                        new nc.IdentificationType("1415_AJACS" , amc.PolicyConstants.REVIEWREFMUSERID)
                     };
             return new List<nc.EntityType> { new nc.EntityType(reviewer) };
         }
@@ -1070,10 +1072,12 @@ namespace AZServiceTest
             }
             return selectedFileName;
         }
-        private wmp.RecordFilingRequest GetRfrFromRvfr(string documentStatus ,  string statusDescription)
+        private wmp.RecordFilingRequest GetRfrFromRvfr(string documentStatus ,  string statusDescription , out List<nc.EntityType> documentReviwer , out List<nc.EntityType> documentReviwerAsReference)
         {
             wmp.RecordFilingRequest rfr = null;
             string rvfrFile = this.GetFileNameToDeserialize();
+            documentReviwer = null;
+            documentReviwerAsReference = null;
             if (!string.IsNullOrWhiteSpace(rvfrFile))
             {
                 wmp.ReviewFilingRequest rvfrRequest = null;
@@ -1092,7 +1096,19 @@ namespace AZServiceTest
                     List<aoc.RecordDocketingMessageType> docketingMessages = new List<aoc.RecordDocketingMessageType>();
                     DateTime rfrPostDate = DateTime.Now;
                     string documentReviwerId = string.Empty;
-                    List<nc.EntityType> documentReviwer = this.DocumentReviwer(out documentReviwerId);
+                    documentReviwer = this.DocumentReviwer(out documentReviwerId);
+                    if (!string.IsNullOrWhiteSpace(documentReviwerId))
+                    {
+                        documentReviwerAsReference = new List<nc.EntityType>
+                                    {
+                                        new nc.EntityType
+                                        {
+                                             EntityRepresentation = new ReferenceType{ Ref = documentReviwerId} ,
+                                             EntityRepresentationType = nc.EntityRepresentationTpes.EntityPersonReference
+                                        }
+                                    };
+                    }
+                 
 
                     if (filingMessage != null && filingMessage.FilingLeadDocument != null && filingMessage.FilingLeadDocument.Count > 0)
                     {
