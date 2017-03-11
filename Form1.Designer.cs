@@ -51,6 +51,10 @@
             this.buttonNetZero = new System.Windows.Forms.Button();
             this.button9 = new System.Windows.Forms.Button();
             this.tbStatus = new System.Windows.Forms.TextBox();
+            this.buttonOverPayment = new System.Windows.Forms.Button();
+            this.tbOverPaymentAmount = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -156,7 +160,7 @@
             // 
             // button11
             // 
-            this.button11.Location = new System.Drawing.Point(281, 295);
+            this.button11.Location = new System.Drawing.Point(471, 531);
             this.button11.Name = "button11";
             this.button11.Size = new System.Drawing.Size(222, 59);
             this.button11.TabIndex = 0;
@@ -224,7 +228,7 @@
             // 
             // button14
             // 
-            this.button14.Location = new System.Drawing.Point(111, 539);
+            this.button14.Location = new System.Drawing.Point(17, 539);
             this.button14.Name = "button14";
             this.button14.Size = new System.Drawing.Size(219, 23);
             this.button14.TabIndex = 0;
@@ -270,7 +274,7 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(460, 539);
+            this.button9.Location = new System.Drawing.Point(242, 539);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(197, 23);
             this.button9.TabIndex = 902;
@@ -287,11 +291,50 @@
             this.tbStatus.Size = new System.Drawing.Size(570, 44);
             this.tbStatus.TabIndex = 903;
             // 
+            // buttonOverPayment
+            // 
+            this.buttonOverPayment.Location = new System.Drawing.Point(400, 315);
+            this.buttonOverPayment.Name = "buttonOverPayment";
+            this.buttonOverPayment.Size = new System.Drawing.Size(211, 23);
+            this.buttonOverPayment.TabIndex = 904;
+            this.buttonOverPayment.Text = "Submit All Accepted Over Payment";
+            this.buttonOverPayment.UseVisualStyleBackColor = true;
+            this.buttonOverPayment.Click += new System.EventHandler(this.buttonOverPayment_Click);
+            // 
+            // tbOverPaymentAmount
+            // 
+            this.tbOverPaymentAmount.Location = new System.Drawing.Point(183, 315);
+            this.tbOverPaymentAmount.MaxLength = 50;
+            this.tbOverPaymentAmount.Name = "tbOverPaymentAmount";
+            this.tbOverPaymentAmount.Size = new System.Drawing.Size(173, 20);
+            this.tbOverPaymentAmount.TabIndex = 906;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(61, 318);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(116, 13);
+            this.label4.TabIndex = 905;
+            this.label4.Text = "Over Payment Amount:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(83, 351);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(0, 13);
+            this.label5.TabIndex = 907;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(729, 662);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.tbOverPaymentAmount);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.buttonOverPayment);
             this.Controls.Add(this.tbStatus);
             this.Controls.Add(this.button9);
             this.Controls.Add(this.buttonNetZero);
@@ -348,6 +391,10 @@
         private System.Windows.Forms.Button buttonNetZero;
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.TextBox tbStatus;
+        private System.Windows.Forms.Button buttonOverPayment;
+        private System.Windows.Forms.TextBox tbOverPaymentAmount;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
     }
 }
 

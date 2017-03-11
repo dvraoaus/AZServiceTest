@@ -813,7 +813,9 @@ namespace AZServiceTest
                         documentStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED, 
                         documentStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED  ,
                         filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED, 
-                        filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED
+                        filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED ,
+                        netZeroSubmission: false ,
+                        overPaymentAmount : 0.00M
                     );
                 if (ndcRequest != null)
                 {
@@ -843,7 +845,7 @@ namespace AZServiceTest
             }
        }
 
-        private wmp.NotifyDocketingCompleteRequest GetNDC(string documentStatusCode , string documentStatusDescription , string filingStatusCode , string filingStatusDescription)
+        private wmp.NotifyDocketingCompleteRequest GetNDC(string documentStatusCode , string documentStatusDescription , string filingStatusCode , string filingStatusDescription , bool netZeroSubmission, decimal overPaymentAmount)
         {
             wmp.NotifyDocketingCompleteRequest ndcRequest = null;
 
@@ -921,7 +923,42 @@ namespace AZServiceTest
                         recordDocketingCallBackMessages.Add(recordDocketingCallBack);
 
                     }
-                    ndcRequest = new wmp.NotifyDocketingCompleteRequest
+                if (netZeroSubmission  && paymentMessage != null && paymentMessage.AllowanceCharge != null && paymentMessage.AllowanceCharge.Count > 0)
+                {
+                    List<aoc.AllowanceChargeType> deleteList = new List<aoc.AllowanceChargeType>();
+                    foreach (aoc.AllowanceChargeType charge in paymentMessage.AllowanceCharge)
+                    {
+                        string summaryDescription = charge.AllowanceChargeCategoryCode != null && !string.IsNullOrEmpty(charge.AllowanceChargeCategoryCode.Value) ? charge.AllowanceChargeCategoryCode.Value : string.Empty;
+                        if (summaryDescription.Equals(amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE, StringComparison.OrdinalIgnoreCase))
+                        {
+                            deleteList.Add(charge);
+                        }
+                    }
+                    foreach (var charge in deleteList)
+                    {
+                        paymentMessage.AllowanceCharge.Remove(charge);
+                    }
+
+                }
+
+                if (overPaymentAmount > 0.00M  && paymentMessage != null && paymentMessage.AllowanceCharge != null && paymentMessage.AllowanceCharge.Count > 0)
+                {
+                    foreach (aoc.AllowanceChargeType charge in paymentMessage.AllowanceCharge)
+                    {
+                        string summaryDescription = charge.AllowanceChargeCategoryCode != null && !string.IsNullOrEmpty(charge.AllowanceChargeCategoryCode.Value) ? charge.AllowanceChargeCategoryCode.Value : string.Empty;
+                        decimal itemAmount = charge.Amount != null ? charge.Amount.Value : 0.00M;
+
+                        if (itemAmount > overPaymentAmount && summaryDescription.Equals(amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE, StringComparison.OrdinalIgnoreCase))
+                        {
+                            charge.Amount.Value = charge.Amount.Value - overPaymentAmount;
+                        }
+                    }
+
+                }
+
+
+
+                ndcRequest = new wmp.NotifyDocketingCompleteRequest
                     (
                          new amc.NotifyDocketingCompleteRequestType
                          {
@@ -930,6 +967,7 @@ namespace AZServiceTest
                          }
                     );
                 }
+
             return ndcRequest;
         } 
 
@@ -1195,7 +1233,9 @@ namespace AZServiceTest
                         documentStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_REJECTED, 
                         documentStatusDescription: "DO NOT HAVE TO GIVE YOU A REASON"  ,
                         filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_REJECTED ,
-                        filingStatusDescription: "DO NOT HAVE TO GIVE YOU A REASON"
+                        filingStatusDescription: "DO NOT HAVE TO GIVE YOU A REASON" ,
+                        netZeroSubmission:false ,
+                        overPaymentAmount:0.00M
                     );
                 if (ndcRequest != null)
                 {
@@ -1575,8 +1615,10 @@ namespace AZServiceTest
                     (
                         documentStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
                         documentStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
-                        filingStatusCode: amc.PolicyConstants.FILING_STATUS_NET_ZERO,
-                        filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED
+                        filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                        filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED ,
+                        netZeroSubmission:true ,
+                        overPaymentAmount:0.00M
                     );
                 if (ndcRequest != null)
                 {
@@ -1713,109 +1755,60 @@ namespace AZServiceTest
 
             }
         }
-        /*
-private List<nc.EntityType> GetCaseInitiatingParties1(object filingCase, bool expandReferences, core.CoreFilingMessageType coreFilingMessage)
-{
-   List<nc.EntityType> initiatingParties = null;
-   Niem.Domains.Jxdm.v40.CaseAugmentationType caseAugmentation = ecf.EcfHelper.GetCaseAugmentation(filingCase);
-   if (caseAugmentation != null)
-   {
-       initiatingParties = expandReferences ? ExpandEntityReferences1(caseAugmentation.CaseInitiatingParty, filingCase, coreFilingMessage) : caseAugmentation.CaseInitiatingParty;
-   }
-   return initiatingParties;
-}
 
-private List<nc.EntityType> ExpandEntityReferences1(List<nc.EntityType> niemEntities, object filingCase, core.CoreFilingMessageType coreFilingMessage)
-{
-   List<nc.EntityType> expandedEntities = new List<nc.EntityType>();
-   if (niemEntities != null && niemEntities.Count > 0)
-   {
+        private void buttonOverPayment_Click(object sender, EventArgs e)
+        {
+            wmp.IFilingReviewMDE _serviceChannel = null;
+            try
+            {
+                decimal overPaymentAmount = 0.00M;
+                if (!string.IsNullOrWhiteSpace(this.tbOverPaymentAmount.Text))
+                {
+                    decimal.TryParse(this.tbOverPaymentAmount.Text, out overPaymentAmount);
+                }
+                if (overPaymentAmount > 0)
+                {
+                    wmp.NotifyDocketingCompleteRequest ndcRequest = this.GetNDC
+                        (
+                            documentStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            documentStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            netZeroSubmission: false,
+                            overPaymentAmount: overPaymentAmount
+                        );
+                    if (ndcRequest != null)
+                    {
+                        _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<wmp.IFilingReviewMDE>
+                            (
+                                "FilingReviewMDEService",
+                                _configFile
+                            );
 
-       List<nc.EntityType> filingSubmitters = (coreFilingMessage != null && coreFilingMessage.DocumentSubmitter != null) ? coreFilingMessage.DocumentSubmitter : null;
-       ecf.CaseAugmentationType ecfCaseAugmentation = ecf.EcfHelper. GetEcfCaseAugmentation(filingCase);
-       List<ecf.CaseParticipantType> caseParticipants = ecfCaseAugmentation != null && ecfCaseAugmentation.CaseParticipant != null && ecfCaseAugmentation.CaseParticipant.Count > 0 ? ecfCaseAugmentation.CaseParticipant : null;
+                        wmp.NotifyDocketingCompleteResponse response = _serviceChannel.NotifyDocketingComplete(ndcRequest);
+                        Save(response);
 
-       foreach (var niemEntity in niemEntities)
-       {
-           Niem.Structures.v20.ReferenceType entiryReference = null;
-           switch (niemEntity.EntityRepresentationType)
-           {
-               case nc.EntityRepresentationTpes.EcfOrganization:
-               case nc.EntityRepresentationTpes.EcfPerson:
-               case nc.EntityRepresentationTpes.EntityPerson:
-               case nc.EntityRepresentationTpes.EntityOrganization:
-                   expandedEntities.Add(niemEntity);
-                   break;
-               case nc.EntityRepresentationTpes.EntityPersonReference:
-                   entiryReference = niemEntity.EntityRepresentation as Niem.Structures.v20.ReferenceType;
-                   Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType ecfPerson = null;
-                   if (entiryReference != null && !string.IsNullOrEmpty(entiryReference.Ref))
-                   {
-                       // first look under case participants
-                       if (caseParticipants != null && caseParticipants.Count > 0)
-                       {
-                           ecf.CaseParticipantType matchingCaseParticipant = caseParticipants.Find(cp => (cp.EntityRepresentationType == nc.EntityRepresentationTpes.EcfPerson && (cp.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType).Id.Equals(entiryReference.Ref)));
-                           if (matchingCaseParticipant != null) ecfPerson = matchingCaseParticipant.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType;
-                       }
-                       if (ecfPerson == null && filingSubmitters != null && filingSubmitters.Count > 0)
-                       {
-                           nc.EntityType matchingEntity = filingSubmitters.Find(et => (et.EntityRepresentationType == nc.EntityRepresentationTpes.EcfPerson && (et.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType).Id.Equals(entiryReference.Ref)));
-                           if (matchingEntity != null) ecfPerson = matchingEntity.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType;
-                       }
-                   }
-                   if (ecfPerson != null)
-                   {
-                       expandedEntities.Add(new nc.EntityType { EntityRepresentation = ecfPerson, EntityRepresentationType = nc.EntityRepresentationTpes.EcfPerson });
-                   }
-                   break;
-               case nc.EntityRepresentationTpes.EntityOrganizationReference:
-                   entiryReference = niemEntity.EntityRepresentation as Niem.Structures.v20.ReferenceType;
-                   object entityOrganization = null;
-                   if (entiryReference != null && !string.IsNullOrEmpty(entiryReference.Ref))
-                   {
-                       // first look under case participants
-                       if (caseParticipants != null && caseParticipants.Count > 0)
-                       {
-                           ecf.CaseParticipantType matchingCaseParticipant = caseParticipants.Find(cp => (cp.EntityRepresentationType == nc.EntityRepresentationTpes.EcfOrganization && (cp.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.OrganizationType).Id.Equals(entiryReference.Ref)));
-                           if (matchingCaseParticipant != null) entityOrganization = matchingCaseParticipant.EntityRepresentation as ecf.OrganizationType;
-                           if (entityOrganization == null)
-                           {
-                               matchingCaseParticipant = caseParticipants.Find(cp => (cp.EntityRepresentationType == nc.EntityRepresentationTpes.AZAOCOrganization && (cp.EntityRepresentation as aoc.OrganizationType).Id.Equals(entiryReference.Ref)));
-                               if (matchingCaseParticipant != null) entityOrganization = matchingCaseParticipant.EntityRepresentation as aoc.OrganizationType;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Over payment amount is required", "error");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (_serviceChannel != null && _serviceChannel is IClientChannel)
+                {
+                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
+                }
 
-                           }
-                       }
-                       if (entityOrganization == null && filingSubmitters != null && filingSubmitters.Count > 0)
-                       {
-                           nc.EntityType matchingEntity = filingSubmitters.Find(et => (et.EntityRepresentationType == nc.EntityRepresentationTpes.EcfOrganization && (et.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.OrganizationType).Id.Equals(entiryReference.Ref)));
-                           if (matchingEntity != null) entityOrganization = matchingEntity.EntityRepresentation as Oasis.LegalXml.CourtFiling.v40.Ecf.OrganizationType;
-                           if (entityOrganization == null)
-                           {
-                               matchingEntity = filingSubmitters.Find(et => (et.EntityRepresentationType == nc.EntityRepresentationTpes.AZAOCOrganization && (et.EntityRepresentation as aoc.OrganizationType).Id.Equals(entiryReference.Ref)));
-                               if (matchingEntity != null) entityOrganization = matchingEntity.EntityRepresentation as aoc.OrganizationType;
-                           }
 
-                       }
-                   }
-                   if (entityOrganization != null)
-                   {
-                       if (entityOrganization is ecf.OrganizationType)
-                       {
-                           expandedEntities.Add(new nc.EntityType { EntityRepresentation = entityOrganization, EntityRepresentationType = nc.EntityRepresentationTpes.EcfOrganization });
-                       }
-                       else if (entityOrganization is aoc.OrganizationType)
-                       {
-                           expandedEntities.Add(new nc.EntityType { EntityRepresentation = entityOrganization, EntityRepresentationType = nc.EntityRepresentationTpes.AZAOCOrganization});
-                       }
+            }
 
-                   }
-
-                   break;
-           }
-       }
-   }
-   return expandedEntities;
-}
-*/
+        }
     }
 }
