@@ -1,28 +1,24 @@
-﻿using System;
+﻿using Niem.Structures.v20;
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.ServiceModel;
 using System.Windows.Forms;
+using System.Xml.Linq;
+using System.Xml.Schema;
 using System.Xml.Serialization;
-using j = Niem.Domains.Jxdm.v40;
-using nc = Niem.NiemCore.v20;
-using UBL21 = Oassis.UBL.v21;
-using niemxsd = Niem.Proxy.xsd.v20;
-using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
 using amc = Arizona.Courts.ExChanges.v20;
 using aoc = Arizona.Courts.Extensions.v20;
-using ecf = Oasis.LegalXml.CourtFiling.v40.Ecf;
-using caseQuery = Oasis.LegalXml.CourtFiling.v40.CaseQuery;
-using caseResponse = Oasis.LegalXml.CourtFiling.v40.CaseResponse;
-using System.Configuration;
-using core = Oasis.LegalXml.CourtFiling.v40.Core;
-using Niem.Structures.v20;
-using System.Xml.Schema;
-using System.Xml.Linq;
 using azs = Arizona.Courts.Services.v20;
-using System.Diagnostics;
+using caseQuery = Oasis.LegalXml.CourtFiling.v40.CaseQuery;
 using docQuery = Oasis.LegalXml.CourtFiling.v40.DocumentQuery;
-using docResponse = Oasis.LegalXml.CourtFiling.v40.DocumentResponse;
+using ecf = Oasis.LegalXml.CourtFiling.v40.Ecf;
+using j = Niem.Domains.Jxdm.v40;
+using nc = Niem.NiemCore.v20;
+using niemxsd = Niem.Proxy.xsd.v20;
+using UBL21 = Oassis.UBL.v21;
+using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
 
 namespace AZServiceTest
 {
@@ -48,60 +44,9 @@ namespace AZServiceTest
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            wmp.ICourtRecordMDE _serviceChannel = null;
+        
 
-            try
-            {
-                _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<wmp.ICourtRecordMDE>
-                    (
-                        "CourtRecordMDEService",
-                        _configFile
-                    );
-
-                wmp.GetDocumentRequest request = new wmp.GetDocumentRequest
-                {
-                    DocumentQueryMessage = new Oasis.LegalXml.CourtFiling.v40.DocumentQuery.DocumentQueryMessageType
-                     {
-                         CaseTrackingID = new Niem.Proxy.xsd.v20.String("CV 2015 000100"),
-                         CaseDocketID = new Niem.Proxy.xsd.v20.String("133551"),
-                         CaseCourt = this.CaseCourt,
-                         QuerySubmitter = new Niem.NiemCore.v20.EntityType
-                         {
-                             EntityRepresentation = new Oasis.LegalXml.CourtFiling.v40.Ecf.PersonType
-                             (
-                                eportalUserId: string.Empty,
-                                prefix: string.Empty,
-                                givenName: "Jim",
-                                middleName: string.Empty,
-                                suffix: string.Empty,
-                                surName: "Price",
-                                id: string.Empty
-                             ),
-                             EntityRepresentationType = Niem.NiemCore.v20.EntityRepresentationTpes.EcfPerson
-                         }
-                     }
-                };
-                wmp.GetDocumentResponse response = _serviceChannel.GetDocument(request);
-                Save(response);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (_serviceChannel != null && _serviceChannel is IClientChannel)
-                {
-                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
-                }
-
-            }
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
+        private void btnGetCase_Click(object sender, EventArgs e)
         {
             azs.ICourtRecordMDE _serviceChannel = null;
 
@@ -376,30 +321,6 @@ namespace AZServiceTest
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            wmp.ReviewFilingRequest reviewFilingRequest = new wmp.ReviewFilingRequest
-                 {
-                     ReviewFilingRequestMessage = new wmp.ReviewFilingRequestMessageType
-                     {
-                         CoreFilingMessage = new aoc.CoreFilingMessageType
-                         {
-                             DocumentIdentification = new List<nc.IdentificationType>
-                             {
-                                 new nc.IdentificationType("14454")
-                             },
-                             Case = this.AZCivilCase,
-                             // CaseTypeSelection = ecf.CaseTypeSelectionType.AZCivilCase ,
-                             ExtendedMetadata = new List<aoc.MetadataType>
-                            {
-                                new  aoc.MetadataType{ Id="CORE_COMMENT1" , CommentText = new nc.TextType("Hello World")}
-                            }
-                         },
-                         // PaymentMessage = this.PaymentMessage
-                     }
-                 };
-            SubmitFiling(reviewFilingRequest);
-        }
 
         private void Save(wmp.ReviewFilingResponse response)
         {
@@ -449,361 +370,9 @@ namespace AZServiceTest
             }
         }
 
-        private aoc.PaymentMessageType PaymentMessage
-        {
-            get
-            {
-                List<UBL21.cac.AllowanceChargeType> allowanceCharges = new List<UBL21.cac.AllowanceChargeType> { };
-                allowanceCharges.Add
-                    (
-                        new aoc.AllowanceChargeType
-                        {
-                            ID = new UBL21.cbc.IDType { Value = "P1" },
-                            ChargeIndicator = new UBL21.cbc.ChargeIndicatorType { Value = true },
-                            AllowanceChargeReasonCode = new UBL21.cbc.AllowanceChargeReasonCodeType { Value = "SERVICE_FEE" },
-                            AllowanceChargeReason = new List<UBL21.cbc.AllowanceChargeReasonType> { new UBL21.cbc.AllowanceChargeReasonType { Value = "Application Fee" } },
-                            MultiplierFactorNumeric = new UBL21.cbc.MultiplierFactorNumericType { Value = 1 },
-                            PrepaidIndicator = new UBL21.cbc.PrepaidIndicatorType { Value = false },
-                            SequenceNumeric = new UBL21.cbc.SequenceNumericType { Value = 1 },
-                            Amount = new UBL21.cbc.AmountType { Value = 6.00M, CurrencyID = "USD" },
-                            AllowanceChargeCategoryCode = new nc.TextType("APPLICATION_FEE"),
-                            BaseAmount = new UBL21.cbc.BaseAmountType { Value = 6.00M, CurrencyID = "USD" }
-                        }
-                     );
-                allowanceCharges.Add
-                    (
-                        new aoc.AllowanceChargeType
-                        {
-                            ID = new UBL21.cbc.IDType { Value = "P2" },
-                            ChargeIndicator = new UBL21.cbc.ChargeIndicatorType { Value = true },
-                            AllowanceChargeReasonCode = new UBL21.cbc.AllowanceChargeReasonCodeType { Value = "CLASSA" },
-                            AllowanceChargeReason = new List<UBL21.cbc.AllowanceChargeReasonType> { new UBL21.cbc.AllowanceChargeReasonType { Value = "CLASSA Fee" } },
-                            MultiplierFactorNumeric = new UBL21.cbc.MultiplierFactorNumericType { Value = 1 },
-                            PrepaidIndicator = new UBL21.cbc.PrepaidIndicatorType { Value = false },
-                            SequenceNumeric = new UBL21.cbc.SequenceNumericType { Value = 2 },
-                            Amount = new UBL21.cbc.AmountType { Value = 280.00M, CurrencyID = "USD" },
-                            AllowanceChargeCategoryCode = new nc.TextType("FILING_FEE"),
-                            BaseAmount = new UBL21.cbc.BaseAmountType { Value = 280.00M, CurrencyID = "USD" }
-                        }
+        
 
-                     );
-
-
-
-                aoc.PaymentMessageType paymentMessage = new aoc.PaymentMessageType
-                {
-                    PayerName = "Gretchen Crates",
-                    AllowanceCharge = allowanceCharges,
-                    Payment = new UBL21.cac.PaymentType
-                    {
-                        ID = new UBL21.cbc.IDType { Value = "4HP88229KK651203L" },
-                        PaidAmount = new UBL21.cbc.PaidAmountType { Value = 286.00M, CurrencyID = "USD" },
-                        PaidDate = new UBL21.cbc.PaidDateType { Value = DateTime.Today },
-                        PaidTime = new UBL21.cbc.PaidTimeType { Value = DateTime.Now },
-                        ReceivedDate = new UBL21.cbc.ReceivedDateType { Value = DateTime.Today },
-                        InstructionID = new UBL21.cbc.InstructionIDType { Value = "Payment for Filing # 781333" }
-                    },
-                    Address = new UBL21.cac.AddressType
-                    {
-                        CityName = new UBL21.cbc.CityNameType { Value = "Denver" },
-                        PostalZone = new UBL21.cbc.PostalZoneType { Value = "80238" },
-                        Country = new UBL21.cac.CountryType
-                        {
-                            IdentificationCode = new UBL21.cbc.IdentificationCodeType { Value = "US" },
-                            Name = new UBL21.cbc.NameType { Value = "United States of America" }
-                        },
-                        AddressLine = new List<UBL21.cac.AddressLineType>
-                        {
-                            new UBL21.cac.AddressLineType{ Line = new UBL21.cbc.LineType{Value="2644 Roslyn St"}} , 
-                            new UBL21.cac.AddressLineType{ Line = new UBL21.cbc.LineType{Value="Unit # 1"}}  
-                        },
-                        CountrySubentity = new UBL21.cbc.CountrySubentityType { Value = "AZ" },
-                        CountrySubentityCode = new UBL21.cbc.CountrySubentityCodeType { Value = "AZ" },
-
-                    },
-                    Metadata = new List<aoc.MetadataType>
-                    {
-                        new aoc.MetadataType{ Id="PAYMNET_CARD_TYPE" , CommentText= new nc.TextType("VISA") },
-                        new aoc.MetadataType{ Id="PAYMNET_CARD_EXPIRATION" , CommentText= new nc.TextType("0816") },
-                        new aoc.MetadataType{ Id="PAYMNET_CARD_LAST4" , CommentText= new nc.TextType("7881") },
-
-                    }
-                };
-                return paymentMessage;
-            }
-        }
-
-        private aoc.CivilCaseType AZCivilCase
-        {
-            get
-            {
-                aoc.OrganizationType aocOrganization = new aoc.OrganizationType
-                               (
-                                 id: "PTY0003",
-                                 eportalOrganizationId: string.Empty,
-                                 name: "SURETY ACCEPTANCE CO",
-                                 eportalUnitId: string.Empty,
-                                 unitName: string.Empty,
-                                 eportalSubUnitId: string.Empty,
-                                 subUnitName: string.Empty,
-                                 address1: "400 East Broadway Boulevard",
-                                 address2: string.Empty,
-                                 city: "Tucson",
-                                 state: "AZ",
-                                 zipCode: "85711",
-                                 phoneNumber: "520-790-7181",
-                                 extension: string.Empty,
-                                 emailAddress: string.Empty
-                               );
-                aocOrganization.OrganizationAugmentation = new j.OrganizationAugmentationType();
-                aocOrganization.EcfOrganizationAugmentation = new ecf.OrganizationAugmentationType();
-                List<ecf.CaseParticipantType> caseParticipant = new List<ecf.CaseParticipantType>
-                        {
-                            new aoc.CaseParticipantType
-                            {
-                                 EntityRepresentation = new ecf.PersonType
-                                 ( 
-                                   id : "PTY0001" ,
-                                   prefix: string.Empty,
-                                   givenName: "CASSANDRA",
-                                   middleName:string.Empty,
-                                   surName: "PRICE" ,
-                                   suffix: string.Empty ,
-                                   eportalUserId: string.Empty 
-                                 ) ,
-                                 EntityRepresentationType = nc.EntityRepresentationTpes.EcfPerson,
-                                 CaseParticipantRoleCode = new nc.TextType("PL")  
-                            } ,
-                            new aoc.CaseParticipantType
-                            {
-                                 EntityRepresentation = new ecf.PersonType
-                                 ( 
-                                   id : "PTY0002" ,
-                                   prefix: string.Empty,
-                                   givenName: "CHRISTOPHER",
-                                   middleName: string.Empty,
-                                   surName: "PRICE" ,
-                                   suffix: string.Empty ,
-                                   eportalUserId: string.Empty 
-                                 ) ,
-                                 EntityRepresentationType = nc.EntityRepresentationTpes.EcfPerson,
-                                 CaseParticipantRoleCode = new nc.TextType("PL")  
-                            } ,
-                            new aoc.CaseParticipantType
-                            {
-                                 EntityRepresentation = aocOrganization ,                                  
-                                 EntityRepresentationType = nc.EntityRepresentationTpes.AZAOCOrganization,
-                                 CaseParticipantRoleCode = new nc.TextType("DE")  
-                            } ,
-
-                        };
-
-                return new aoc.CivilCaseType
-                {
-                    CaseTitleText = new List<nc.TextType> { new nc.TextType("CCPACKING ET AL. Vs. Lamex") },
-                    CaseCategoryText = new List<nc.TextType> { new nc.TextType("Civil") },
-                    CaseTrackingID = new List<niemxsd.String> { new niemxsd.String("C20117066") },
-                    ClassActionIndicator = new niemxsd.Boolean(false),
-                    JuryDemandIndicator = new niemxsd.Boolean(true),
-                    CaseGeneralCategoryText = new nc.TextType("Civil"),
-                    CaseSubCategoryText = new nc.TextType("Default"),
-                    CaseAugmentation = new j.CaseAugmentationType
-                    {
-                        CaseCourt = new List<j.CourtType> { this.CaseCourt }
-                    },
-                    EcfCaseAugmentation = new aoc.CaseAugmentationType
-                    {
-                        CaseParticipant = caseParticipant
-                    }
-
-                };
-            }
-        }
-
-
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog opeFileDialog = null;
-            try
-            {
-                opeFileDialog = new OpenFileDialog();
-                opeFileDialog.CheckFileExists = false;
-                opeFileDialog.CheckPathExists = true;
-                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-                opeFileDialog.Title = "Select a file to Submit ";
-                DialogResult dr = opeFileDialog.ShowDialog(this);
-                if (dr == DialogResult.OK)
-                {
-                    wmp.ReviewFilingRequest reviewFilingRequest = null;
-                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open))
-                    {
-                        XmlSerializerNamespaces namespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
-                        ecf.EcfHelper.AddNameSpaces(namespaces);
-                        XmlSerializer serializer = new XmlSerializer(typeof(wmp.ReviewFilingRequest));
-                        reviewFilingRequest = serializer.Deserialize(fs) as wmp.ReviewFilingRequest;
-                        fs.Flush();
-                        fs.Close();
-                    }
-
-                    SubmitFiling(reviewFilingRequest);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (opeFileDialog != null)
-                {
-                    opeFileDialog.Dispose();
-                }
-            }
-        }
-
-        private void SubmitFiling(wmp.ReviewFilingRequest reviewFilingRequest)
-        {
-            wmp.IFilingReviewMDE _serviceChannel = null;
-
-            try
-            {
-                if (reviewFilingRequest != null)
-                {
-                    _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<wmp.IFilingReviewMDE>
-                        (
-                            "FilingReviewMDEService",
-                            _configFile
-                        );
-
-                    wmp.ReviewFilingResponse response = _serviceChannel.ReviewFiling(reviewFilingRequest);
-                    Save(response);
-                }
-                else
-                {
-                    MessageBox.Show("Review filing request is null", "Submit Filing");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Submit Filing : Error");
-            }
-            finally
-            {
-                if (_serviceChannel != null && _serviceChannel is IClientChannel)
-                {
-                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
-                }
-
-            }
-
-
-        }
-
-        private void button5_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog opeFileDialog = null;
-            try
-            {
-                opeFileDialog = new OpenFileDialog();
-                opeFileDialog.CheckFileExists = false;
-                opeFileDialog.CheckPathExists = true;
-                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-                opeFileDialog.Title = "Select a file to Submit ";
-                DialogResult dr = opeFileDialog.ShowDialog(this);
-                if (dr == DialogResult.OK)
-                {
-                    wmp.ReviewFilingRequest reviewFilingRequest = null;
-                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open))
-                    {
-                        XmlSerializerNamespaces namespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
-                        ecf.EcfHelper.AddNameSpaces(namespaces);
-                        XmlSerializer serializer = new XmlSerializer(typeof(wmp.ReviewFilingRequest));
-                        reviewFilingRequest = serializer.Deserialize(fs) as wmp.ReviewFilingRequest;
-                        fs.Flush();
-                        fs.Close();
-                    }
-                    SubmitFiling(reviewFilingRequest);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (opeFileDialog != null)
-                {
-                    opeFileDialog.Dispose();
-                }
-            }
-
-        }
-
-        private void button6_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog opeFileDialog = null;
-            try
-            {
-                opeFileDialog = new OpenFileDialog();
-                opeFileDialog.CheckFileExists = false;
-                opeFileDialog.CheckPathExists = true;
-                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-                opeFileDialog.Title = "Select a file to Submit ";
-                DialogResult dr = opeFileDialog.ShowDialog(this);
-                if (dr == DialogResult.OK)
-                {
-                    wmp.ReviewFilingRequest reviewFilingRequest = null;
-                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open))
-                    {
-                        XmlSerializerNamespaces namespaces = new System.Xml.Serialization.XmlSerializerNamespaces();
-                        ecf.EcfHelper.AddNameSpaces(namespaces);
-                        XmlSerializer serializer = new XmlSerializer(typeof(wmp.ReviewFilingRequest));
-                        reviewFilingRequest = serializer.Deserialize(fs) as wmp.ReviewFilingRequest;
-                        fs.Flush();
-                        fs.Close();
-                    }
-                    core.CoreFilingMessageType coreFilingMessage = reviewFilingRequest != null ? reviewFilingRequest.CoreFilingMessage : null;
-                    aoc.CoreFilingMessageType filingMessage = coreFilingMessage != null && coreFilingMessage is aoc.CoreFilingMessageType ? coreFilingMessage as aoc.CoreFilingMessageType : null;
-                    
-                    List<nc.EntityType> filingParties = ecf.EcfHelper.GetCaseInitiatingParties(filingCase: filingMessage.Case, expandReferences: true, coreFilingMessage: filingMessage);
-                    if (filingParties != null)
-                    {
-                        MessageBox.Show("# Filing Parties " + filingParties.Count);
-                    }
-                    if (filingMessage != null)
-                    {
-                        DateTime? postTime = null;
-                        if (filingMessage.DocumentPostDate != null && filingMessage.DocumentPostDate.Count > 0)
-                        {
-                            postTime = filingMessage.DocumentPostDate[0].DateValue;
-                        }
-                        MessageBox.Show(string.Format("Post Time {0} Received Time {1} ", postTime, filingMessage.ReceivedTime));
-
-                    }
-                    else
-                    {
-                        MessageBox.Show("Filing Message is null !!!!");
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (opeFileDialog != null)
-                {
-                    opeFileDialog.Dispose();
-                }
-            }
-        }
-
-        private void button7_Click(object sender, EventArgs e)
+        private void btnSubmitAllAcceptedNoChnage_Click(object sender, EventArgs e)
         {
             wmp.IFilingReviewMDE _serviceChannel = null;
             try
@@ -1274,7 +843,7 @@ namespace AZServiceTest
             }
         }
 
-        private void button8_Click(object sender, EventArgs e)
+        private void btnSubmitAllRejected_Click(object sender, EventArgs e)
         {
             wmp.IFilingReviewMDE _serviceChannel = null;
             try
@@ -1320,7 +889,9 @@ namespace AZServiceTest
 
         
 
-        private void button10_Click(object sender, EventArgs e)
+        
+
+        private void btnValidateAOCCase_Click(object sender, EventArgs e)
         {
             OpenFileDialog opeFileDialog = null;
             try
@@ -1329,76 +900,34 @@ namespace AZServiceTest
                 opeFileDialog.CheckFileExists = false;
                 opeFileDialog.CheckPathExists = true;
                 opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-                opeFileDialog.Title = "Select a file to Deserialize ";
-                DialogResult dr = opeFileDialog.ShowDialog(this);
-                if (dr == DialogResult.OK)
-                {
-                    aoc.CivilCaseType civilCase = null;
-                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open))
-                    {
-                        XmlSerializer serializer = new XmlSerializer(typeof(aoc.CivilCaseType));
-                        civilCase = serializer.Deserialize(fs) as aoc.CivilCaseType;
-                        fs.Flush();
-                        fs.Close();
-                    }
-                    if (civilCase != null)
-                    {
-                        int numberOfCaseParticipants = 0;
-                        if (civilCase != null && civilCase.EcfCaseAugmentation != null && civilCase.EcfCaseAugmentation.CaseParticipant != null)
-                        {
-                            numberOfCaseParticipants = civilCase.EcfCaseAugmentation.CaseParticipant.Count;
-                        }
-                        MessageBox.Show(string.Format("# Participants {0}  ", numberOfCaseParticipants));
-
-                    }
-                    else
-                    {
-                        MessageBox.Show("Civil Case is null !!!!");
-                    }
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (opeFileDialog != null)
-                {
-                    opeFileDialog.Dispose();
-                }
-            }
-
-        }
-
-        private void button11_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog opeFileDialog = null;
-            try
-            {
-                opeFileDialog = new OpenFileDialog();
-                opeFileDialog.CheckFileExists = false;
-                opeFileDialog.CheckPathExists = true;
-                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
-                opeFileDialog.Title = "Select a file to Validate ";
+                opeFileDialog.Title = "Select a NDC (NotifyDocketingCompleteRequest) Validate ";
                 DialogResult dr = opeFileDialog.ShowDialog(this);
                 if (dr == DialogResult.OK)
                 {
                     XmlSchemaSet schemas = new XmlSchemaSet();
+                    
                     schemas.Add
                         (
-                            "http://schema.azcourts.az.gov/aoc/efiling/ecf/exchange/GetCase/2.0",
-                            "http://webservicedev/contracts/ecf-v4.0-spec/xsd/exchange/GetCase-MessageExchange.xsd"
+                            null,
+                            @"C:\AZBuildFiles54\WebServer\ECF4.01\xsd\exchange\NotifyDocketingComplete-MessageExchange.xsd"
                         );
+
                     XDocument doc = XDocument.Load(opeFileDialog.FileName);
                     bool errors = false;
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
                     doc.Validate(schemas, (o, validationError) =>
                     {
-                        MessageBox.Show(string.Format( "{0}", validationError.Message));
+                        sb.Append(string.Format("{0}\r\n", validationError.Message ));
                         errors = true;
                     }, true);
-                    MessageBox.Show(string.Format( "document {0} {1}", opeFileDialog.FileName, errors ? "did not validate" : "validated"));
+                    if (errors)
+                    {
+                        MessageBox.Show(sb.ToString() , string.Format("document {0} {1}", opeFileDialog.FileName, "did not validate" ));
+                    }
+                    else
+                    {
+                        MessageBox.Show(string.Format("document {0} {1}", opeFileDialog.FileName, "validated"));
+                    }
 
                 }
 
@@ -1417,42 +946,9 @@ namespace AZServiceTest
 
         }
 
-        private void button12_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                 string logFileFolder = @"c:\wcfTraces\";
-                VistaSG.Common.LogHelper log1 = new VistaSG.Common.LogHelper(logFileName:logFileFolder + @"\log1.log" , logLevelText:"INFO" , logName: "purgePendingFilingTaskLog" , rollingFile:true) ;
-                VistaSG.Common.LogHelper log2 = new VistaSG.Common.LogHelper(logFileName:logFileFolder + @"\log2.log" , logLevelText:"INFO" , logName: "orpushLog" , rollingFile:true) ;
-                VistaSG.Common.LogHelper log3 = new VistaSG.Common.LogHelper(logFileName: logFileFolder + @"\log3.log", logLevelText: "INFO", logName: "orpullLog", rollingFile: true);
-                for (int i = 0; i < 10000; i++)
-                {
-                    log1.LogToTrace(TraceEventType.Information, string.Format("LOG1 Line # {0} ", i));
-                    log2.LogToTrace(TraceEventType.Information, string.Format("LOG2 Line # {0} ", i));
-                    log3.LogToTrace(TraceEventType.Information, string.Format("LOG3 Line # {0} ", i));
-                }
-                log1.CloseLog();
-                for (int i = 10001; i < 20000; i++)
-                {
-                    log2.LogToTrace(TraceEventType.Information, string.Format("LOG2 Line # {0} ", i));
-                    log3.LogToTrace(TraceEventType.Information, string.Format("LOG3 Line # {0} ", i));
-                }
-                log2.CloseLog();
-                for (int i = 20001; i < 30000; i++)
-                {
-                    log3.LogToTrace(TraceEventType.Information, string.Format("LOG3 Line # {0} ", i));
-                }
+        
 
-                log3.CloseLog();
-                MessageBox.Show("Done");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        }
-
-        private void button13_Click(object sender, EventArgs e)
+        private void btnGetDocument_Click(object sender, EventArgs e)
         {
             azs.ICourtRecordMDE _serviceChannel = null;
 
@@ -1487,171 +983,9 @@ namespace AZServiceTest
 
         }
 
-        private void button14_Click(object sender, EventArgs e)
-        {
-            azs.ICourtRecordMDE _serviceChannel = null;
-            VistaSG.Common.LogHelper log1 = null;
-            try
-            {
-                string logFileFolder = @"C:\Changes\Arizona\DocTest\";
-                log1 = new VistaSG.Common.LogHelper(logFileName: logFileFolder + @"\doctest.log", logLevelText: "INFO", logName: "docTest", rollingFile: true);
-                
-                _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<azs.ICourtRecordMDE>
-                    (
-                        "CourtRecordMDEService",
-                        _configFile
-                    );
+        
 
-                wmp.GetCaseRequest getCaserequest = new wmp.GetCaseRequest
-                (
-                      new amc.GetCaseRequestType { CaseQueryMessage = this.SampleCaseQuery }
-                );
-                wmp.GetDocumentRequest getDocumentrequest = new wmp.GetDocumentRequest
-                (
-                      new amc.GetDocumentRequestType { DocumentQueryMessage = this.SampleDocumentQuery }
-                );
-
-                int numberOfDocumentsAvailable = 0;
-                int numberOfDocumentsNotAvailable = 0;
-                int numberOfCases = 0;
-                for (int i = 412; i < 413; i++)
-                {
-                    string caseNumber = string.Format("P1300CV2014{0}", i.ToString().PadLeft(5, '0'));
-                    this.textBoxStatus.Text = string.Format("Fetching Case Information for {0}", caseNumber);
-                    Application.DoEvents();
-                    getCaserequest.CaseQueryMessage.CaseTrackingID = new niemxsd.String(caseNumber);
-                    DateTime startTime = DateTime.Now;
-                    wmp.GetCaseResponse response = _serviceChannel.GetCase(getCaserequest);
-                    string getCaseResponseFileName = Path.Combine(logFileFolder, string.Format("{0}.xml", caseNumber));
-                    SaveGetCaseResponse(response, getCaseResponseFileName);
-                    log1.LogToTrace(TraceEventType.Information, string.Format( "Fetched Case Information for {0} in {1} Milli Seconds" , caseNumber , DateTime.Now.Subtract(startTime).TotalMilliseconds));
-                    if (response != null && response.CaseResponseMessage != null && response.CaseResponseMessage.Case != null && response.CaseResponseMessage.Case is aoc.CivilCaseType )
-                    {
-                        aoc.CivilCaseType civilCase = response.CaseResponseMessage.Case as aoc.CivilCaseType;
-                        numberOfCases++;
-                        if (civilCase.CaseAugmentation != null && civilCase.CaseAugmentation.CaseCourtEvent != null)
-                        {
-                            foreach (var ccevent in civilCase.CaseAugmentation.CaseCourtEvent)
-                            {
-                                if (ccevent is ecf.CourtEventType)
-                                {
-                                    string documentId = string.Empty ;
-                                    ecf.CourtEventType ecfCourtEvent = ccevent as ecf.CourtEventType;
-                                    if (ecfCourtEvent != null &&
-                                         ecfCourtEvent.CourtEventDocument != null &&
-                                         ecfCourtEvent.CourtEventDocument.DocumentRendition != null &&
-                                         ecfCourtEvent.CourtEventDocument.DocumentRendition.Count > 0 &&
-                                         ecfCourtEvent.CourtEventDocument.DocumentRendition[0].DocumentIdentification != null  
-
-                                        )
-                                    {
-                                        documentId = ecf.EcfHelper.GetIdentificationValue(ecfCourtEvent.CourtEventDocument.DocumentRendition[0].DocumentIdentification , "SourceDocumentID");
-                                    }
-                                    byte[] documentImage = null;
-                                    if ( !string.IsNullOrWhiteSpace(documentId))
-                                    {
-                                        this.textBoxStatus.Text = string.Format("Fetching Document {0} SourceDocumentId {1}", caseNumber , documentId);
-                                        Application.DoEvents();
-                                        getDocumentrequest.DocumentQueryMessage.CaseTrackingID = new niemxsd.String(caseNumber);
-                                        getDocumentrequest.DocumentQueryMessage.CaseDocketID = new niemxsd.String(documentId);
-                                        startTime = DateTime.Now;
-                                        wmp.GetDocumentResponse documentResponse = _serviceChannel.GetDocument(getDocumentrequest);
-                                        if (documentResponse != null && documentResponse.DocumentResponseMessage != null && documentResponse.DocumentResponseMessage.IsSuccessfull && documentResponse.DocumentResponseMessage.Document != null && documentResponse.DocumentResponseMessage.Document.DocumentImage != null )
-                                        {
-                                            documentImage = documentResponse.DocumentResponseMessage.Document.DocumentImage;
-                                            log1.LogToTrace(TraceEventType.Information, string.Format("Fetched Document {0} SourceDocumentId {1} Image Size {3} in {2} Milli Seconds", caseNumber, documentId, DateTime.Now.Subtract(startTime).TotalMilliseconds , documentImage.Length));
-                                        }
-                                        else if (documentResponse != null && documentResponse.DocumentResponseMessage != null && documentResponse.DocumentResponseMessage.IsSuccessfull == false )
-                                        {
-                                            string errorCode = string.Empty;
-                                            string errorText = string.Empty;
-                                            if (documentResponse.DocumentResponseMessage.Error != null && documentResponse.DocumentResponseMessage.Error.Count > 0)
-                                            {
-                                                errorCode = documentResponse.DocumentResponseMessage.Error[0].ErrorCode.ToString();
-                                                errorText = documentResponse.DocumentResponseMessage.Error[0].ErrorText.ToString();
-
-                                            }
-                                            log1.LogToTrace(TraceEventType.Information, string.Format("Fetched Document {0} SourceDocumentId {1} Error Code {3} Error Text {4} in {2} Milli Seconds", caseNumber, documentId, DateTime.Now.Subtract(startTime).TotalMilliseconds, errorCode , errorText  ));
-                                        }
-
-                                    }
-
-                                    if (documentImage != null && documentImage.Length > 0)
-                                    {
-                                        numberOfDocumentsAvailable++;
-                                    }
-                                    else
-                                    {
-                                        numberOfDocumentsNotAvailable++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-                string infoMessage = string.Format("# Cases {0} # Documents Present {1} # Documents Not Present {2}", numberOfCases, numberOfDocumentsAvailable, numberOfDocumentsNotAvailable);
-                log1.LogToTrace(TraceEventType.Information, infoMessage);
-                MessageBox.Show(infoMessage , "Done");
-             
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (_serviceChannel != null && _serviceChannel is IClientChannel)
-                {
-                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
-                }
-                if (log1 != null)
-                {
-                    log1.CloseLog();
-                }
-            }
-
-
-        }
-
-        private List<string> GetFilingPartyIds(aoc.CoreFilingMessageType filingMessage)
-        {
-            List<string> filingPartyIds = new List<string>();
-            // FilingMessageHelper filingMessageHelper = new FilingMessageHelper();
-            aoc.CivilCaseType civilCase = filingMessage != null && filingMessage.Case != null && filingMessage.Case is aoc.CivilCaseType ? filingMessage.Case as aoc.CivilCaseType : null; // 
-            aoc.CaseAugmentationType ecfCaseAugmentation = civilCase != null && civilCase.EcfCaseAugmentation != null && civilCase.EcfCaseAugmentation is aoc.CaseAugmentationType ? civilCase.EcfCaseAugmentation as aoc.CaseAugmentationType  : null;
-            j.CaseAugmentationType caseAugmentation = civilCase != null && civilCase.CaseAugmentation != null ? civilCase.CaseAugmentation : null;
-            if (filingMessage != null &&
-                civilCase != null &&
-                ecfCaseAugmentation != null &&
-                caseAugmentation != null
-                )
-            {
-                // Now Filing Parties
-                if (caseAugmentation.CaseInitiatingParty != null &&
-                    caseAugmentation.CaseInitiatingParty.Count > 0
-                    )
-                {
-                    foreach (var cip in caseAugmentation.CaseInitiatingParty)
-                    {
-                        if (cip.EntityRepresentation != null &&
-                             cip.EntityRepresentation is ReferenceType &&
-                             (cip.EntityRepresentationType == nc.EntityRepresentationTpes.EntityPersonReference ||
-                               cip.EntityRepresentationType == nc.EntityRepresentationTpes.EntityOrganizationReference
-                              ) &&
-                              !string.IsNullOrWhiteSpace((cip.EntityRepresentation as ReferenceType).Ref)
-                           )
-                        {
-                            string participantId = (cip.EntityRepresentation as ReferenceType).Ref;
-
-                            filingPartyIds.Add(participantId);
-                        }
-                    }
-                }
-
-            }
-            return filingPartyIds;
-        }
+        
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -1702,7 +1036,7 @@ namespace AZServiceTest
             }
         }
 
-        private void button9_Click(object sender, EventArgs e)
+        private void btngetCasesFromFile_Click(object sender, EventArgs e)
         {
             string errorFileName = string.Empty;
             StreamWriter errorFileWriter = null;
