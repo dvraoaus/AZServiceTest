@@ -47,6 +47,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.buttonChangeDocumentType = new System.Windows.Forms.Button();
+            this.btnFixNDC = new System.Windows.Forms.Button();
+            this.btnGenerateNFRCFromNDC = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnGetCase
@@ -81,9 +83,9 @@
             // 
             // btnValidateAOCCase
             // 
-            this.btnValidateAOCCase.Location = new System.Drawing.Point(248, 351);
+            this.btnValidateAOCCase.Location = new System.Drawing.Point(41, 343);
             this.btnValidateAOCCase.Name = "btnValidateAOCCase";
-            this.btnValidateAOCCase.Size = new System.Drawing.Size(346, 32);
+            this.btnValidateAOCCase.Size = new System.Drawing.Size(197, 32);
             this.btnValidateAOCCase.TabIndex = 105;
             this.btnValidateAOCCase.TabStop = false;
             this.btnValidateAOCCase.Text = "Validate NDC";
@@ -163,7 +165,7 @@
             // 
             // btngetCasesFromFile
             // 
-            this.btngetCasesFromFile.Location = new System.Drawing.Point(33, 356);
+            this.btngetCasesFromFile.Location = new System.Drawing.Point(41, 292);
             this.btngetCasesFromFile.Name = "btngetCasesFromFile";
             this.btngetCasesFromFile.Size = new System.Drawing.Size(197, 23);
             this.btngetCasesFromFile.TabIndex = 104;
@@ -226,11 +228,32 @@
             this.buttonChangeDocumentType.UseVisualStyleBackColor = true;
             this.buttonChangeDocumentType.Click += new System.EventHandler(this.buttonChangeDocumentType_Click);
             // 
+            // btnFixNDC
+            // 
+            this.btnFixNDC.Location = new System.Drawing.Point(248, 343);
+            this.btnFixNDC.Name = "btnFixNDC";
+            this.btnFixNDC.Size = new System.Drawing.Size(141, 32);
+            this.btnFixNDC.TabIndex = 106;
+            this.btnFixNDC.Text = "Transform NDC";
+            this.btnFixNDC.UseVisualStyleBackColor = true;
+            this.btnFixNDC.Click += new System.EventHandler(this.btnFixNDC_Click);
+            // 
+            // btnGenerateNFRCFromNDC
+            // 
+            this.btnGenerateNFRCFromNDC.Location = new System.Drawing.Point(424, 343);
+            this.btnGenerateNFRCFromNDC.Name = "btnGenerateNFRCFromNDC";
+            this.btnGenerateNFRCFromNDC.Size = new System.Drawing.Size(222, 32);
+            this.btnGenerateNFRCFromNDC.TabIndex = 107;
+            this.btnGenerateNFRCFromNDC.Text = "Generate NFRC From NDC";
+            this.btnGenerateNFRCFromNDC.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(729, 662);
+            this.Controls.Add(this.btnGenerateNFRCFromNDC);
+            this.Controls.Add(this.btnFixNDC);
             this.Controls.Add(this.buttonChangeDocumentType);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.tbOverPaymentAmount);
@@ -277,6 +300,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button buttonChangeDocumentType;
+        public System.Windows.Forms.Button btnFixNDC;
+        public System.Windows.Forms.Button btnGenerateNFRCFromNDC;
     }
 }
 

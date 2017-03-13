@@ -17,6 +17,7 @@ using j = Niem.Domains.Jxdm.v40;
 using nc = Niem.NiemCore.v20;
 using niemxsd = Niem.Proxy.xsd.v20;
 using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
+using VistaSG.Requests.DataContracts.Types;
 
 namespace AZServiceTest
 {
@@ -538,8 +539,15 @@ namespace AZServiceTest
                     schemas.Add
                         (
                             null,
-                            @"C:\AZBuildFiles54\WebServer\ECF4.01\xsd\exchange\NotifyDocketingComplete-MessageExchange.xsd"
+                            @"C:\development\eUniversa1\5.4\ECF4.01\xsd\exchange\NotifyDocketingComplete-MessageExchange.xsd"
                         );
+
+                    schemas.Add
+                        (
+                            null,
+                            @"C:\development\eUniversa1\5.4\ECF4.01\xsd\common\ECF-3.0_Null_Signature_Profile_1.0.xsd"
+                        );
+
 
                     XDocument doc = XDocument.Load(opeFileDialog.FileName);
                     bool errors = false;
@@ -881,6 +889,108 @@ namespace AZServiceTest
 
             }
 
+        }
+
+        private void btnFixNDC_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opeFileDialog = null;
+            try
+            {
+                opeFileDialog = new OpenFileDialog();
+                opeFileDialog.CheckFileExists = false;
+                opeFileDialog.CheckPathExists = true;
+                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                opeFileDialog.Title = "Select a NDC (NotifyDocketingCompleteRequest) to transform ";
+                DialogResult dr = opeFileDialog.ShowDialog(this);
+                if (dr == DialogResult.OK)
+                {
+                    amc.NotifyDocketingCompleteRequestType originalNDC = null;
+                    XmlSerializer ndcrSerializer = new XmlSerializer(typeof(amc.NotifyDocketingCompleteRequestType));
+                    using (var fs = new FileStream(opeFileDialog.FileName , FileMode.Open, FileAccess.Read))
+                    {
+                        originalNDC = ndcrSerializer.Deserialize(fs) as amc.NotifyDocketingCompleteRequestType;
+                    }
+                    if (originalNDC != null)
+                    {
+                        NDCHelper ndcHelper = new NDCHelper();
+                        RequestType request = new RequestType
+                        {
+                            Information = new RequestInformationType {  SubmittedToOrganizationId = 1 , SubmittedToOrganizationName = "Yavapai County  -  Prescott" }
+                        };
+                    
+                        amc.NotifyDocketingCompleteRequestType transformedNDCRequest = ndcHelper.TransformNDC(originalNDC: originalNDC , request:request);
+                        Save(transformedNDCRequest);
+                    }
+                    else
+                    {
+                        MessageBox.Show("AOC NDC Request is null" , "Error");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (opeFileDialog != null)
+                {
+                    opeFileDialog.Dispose();
+                }
+            }
+
+
+        }
+
+        private void Save(amc.NotifyDocketingCompleteRequestType transformedNDC)
+        {
+
+            SaveFileDialog saveFileDialog = null;
+            try
+            {
+                if (transformedNDC != null )
+                {
+
+                    saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.CheckFileExists = false;
+                    saveFileDialog.CheckPathExists = true;
+                    saveFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                    saveFileDialog.Title = "Select a file to save  to ";
+                    saveFileDialog.FileName = this.textBoxCaseNumber.Text;
+                    DialogResult dr = saveFileDialog.ShowDialog(this);
+                    if (dr == DialogResult.OK)
+                    {
+                        if (File.Exists(saveFileDialog.FileName))
+                        {
+                            File.Delete(saveFileDialog.FileName);
+                        }
+                        XmlSerializer ndcrSerializer = new XmlSerializer(typeof(amc.NotifyDocketingCompleteRequestType));
+                        using (var fs = new FileStream(saveFileDialog.FileName, FileMode.CreateNew, FileAccess.Write))
+                        {
+                            ndcrSerializer.Serialize(fs, transformedNDC);
+                            fs.Flush();
+                            fs.Close();
+                        }
+
+                        MessageBox.Show(string.Format("Saved NDC to {0}", saveFileDialog.FileName), "Save");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        string.Format("NDC is null !!!!"), "Save");
+                }
+            }
+            finally
+            {
+                if (saveFileDialog != null)
+                {
+                    saveFileDialog.Dispose();
+                    saveFileDialog = null;
+                }
+
+            }
         }
     }
 }

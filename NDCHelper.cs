@@ -11,7 +11,7 @@ using nc = Niem.NiemCore.v20;
 using niemxsd = Niem.Proxy.xsd.v20;
 using UBL21 = Oassis.UBL.v21;
 using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
-
+using VistaSG.Requests.DataContracts.Types;
 namespace AZServiceTest
 {
     public  class NDCHelper
@@ -421,6 +421,149 @@ namespace AZServiceTest
             }
             return selectedFileName;
         }
+
+        public amc.NotifyDocketingCompleteRequestType TransformNDC(amc.NotifyDocketingCompleteRequestType originalNDC , RequestType request)
+        {
+            amc.NotifyDocketingCompleteRequestType transformedNDC = new amc.NotifyDocketingCompleteRequestType();
+            if (originalNDC != null )
+            {
+                transformedNDC = originalNDC;
+            }
+            if (transformedNDC != null)
+            {
+                if (transformedNDC.RecordDocketingCallbackMessage != null && transformedNDC.RecordDocketingCallbackMessage.Count > 0)
+                {
+                    int callBackNumber = 0;
+                    string documentReviwerId = string.Empty;
+                    List<nc.EntityType> documentReviwer = DocumentReviwer(request , out documentReviwerId  );
+                    List<nc.EntityType> documentReviwerAsReference = null;
+                    if (!string.IsNullOrWhiteSpace(documentReviwerId))
+                    {
+                        documentReviwerAsReference = new List<nc.EntityType>
+                                    {
+                                        new nc.EntityType
+                                        {
+                                             EntityRepresentation = new ReferenceType{ Ref = documentReviwerId} ,EntityRepresentationType = nc.EntityRepresentationTpes.EntityPersonReference
+
+                                        }
+                                    };
+                    }
+
+                    foreach (var cb in transformedNDC.RecordDocketingCallbackMessage)
+                    {
+                        callBackNumber++;
+                        if (callBackNumber == 1)
+                        {
+                            cb.DocumentSubmitter = documentReviwer;
+                        }
+                        else
+                        {
+                            cb.DocumentSubmitter = documentReviwerAsReference;
+                        }
+                        if (cb.ReviewedLeadDocument != null && cb.ReviewedLeadDocument is aoc.ReviewedDocumentType)
+                        {
+                            cb.ReviewedLeadDocument = this.FixReviewedDocument(cb.ReviewedLeadDocument as aoc.ReviewedDocumentType , documentReviwerAsReference);
+                        }
+                        if (cb.ReviewedConnectedDocument != null && cb.ReviewedConnectedDocument.Count > 0 )
+                        {
+                            for(int i = 0 ; i < cb.ReviewedConnectedDocument.Count ; i++)
+                            {
+                                if (cb.ReviewedConnectedDocument[i] is aoc.ReviewedDocumentType)
+                                {
+                                    cb.ReviewedConnectedDocument[i] = this.FixReviewedDocument(cb.ReviewedConnectedDocument[i] as aoc.ReviewedDocumentType , documentReviwerAsReference) ;
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            return transformedNDC;
+        }
+
+        private aoc.ReviewedDocumentType FixReviewedDocument(aoc.ReviewedDocumentType reviewedDocument , List<nc.EntityType> documentReviwerAsReference)
+        {
+            aoc.ReviewedDocumentType fixedDocument = new aoc.ReviewedDocumentType();
+            string coreFilingDocumentId = string.Empty;
+            if (reviewedDocument != null)
+            {
+                fixedDocument = reviewedDocument;
+                if (!string.IsNullOrWhiteSpace(reviewedDocument.Ref)) coreFilingDocumentId = reviewedDocument.Ref;
+            }
+            if (fixedDocument != null && !string.IsNullOrWhiteSpace(coreFilingDocumentId))
+            {
+                fixedDocument.DocumentIdentification = new List<nc.IdentificationType> { new nc.IdentificationType(coreFilingDocumentId, amc.PolicyConstants.DOCUMENT_ID) };
+                fixedDocument.Ref = null;
+                fixedDocument.DocumentSubmitter = documentReviwerAsReference;
+                if (fixedDocument.DocumentMetadata != null && fixedDocument.DocumentMetadata is aoc.DocumentMetadataType)
+                {
+                    aoc.DocumentMetadataType documentMetaData = fixedDocument.DocumentMetadata as aoc.DocumentMetadataType;
+                    documentMetaData.ParentDocumentReference = null;
+                    documentMetaData.FilingAttorneyID = new aoc.FilingAttorneyIDType();
+                    documentMetaData.FilingPartyID = new List<nc.IdentificationType> { new aoc.FilingPartyIdType() };
+
+                }
+                if (fixedDocument.DocumentRendition == null)
+                {
+                    fixedDocument.DocumentRendition = new List<ecf.DocumentRenditionType>();
+                }
+                if (fixedDocument.DocumentRendition.Count == 0)
+                {
+                    aoc.DocumentRenditionType blankRendition = new aoc.DocumentRenditionType
+                    {
+                        DocumentSignature = new List<ecf.DocumentSignatureType>
+                        {
+                            new ecf.DocumentSignatureType
+                            {
+                                SignatureProfileID = new nc.TextType("urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:NullSignature-1.0") ,
+                                Signature = new ecf.SignatureType
+                                {
+                                    Signatures = new W3.DigitalSignature.NullSignatureType()
+                                }
+
+                            }
+                        },
+                        DocumentRenditionMetadata = new ecf.DocumentRenditionMetadataType
+                        {
+                            DocumentAttachment = new List<ecf.DocumentAttachmentType> { new ecf.DocumentAttachmentType() } 
+                        }
+                   
+                    };
+                
+                    fixedDocument.DocumentRendition.Add(blankRendition);
+                }
+            }
+            return fixedDocument;
+        }
+
+        private List<nc.EntityType> DocumentReviwer(RequestType request , out string reviewerId)
+        {
+            reviewerId = ecf.EcfHelper.UUID;
+            string surname = "Clerk";
+            string givenName = request != null && request.Information != null ? string.Format("{0}", request.Information.SubmittedToOrganizationName) : "Superior Court";
+            ecf.PersonType reviewer = new ecf.PersonType
+                            (
+                                id: reviewerId,
+                                prefix: string.Empty,
+                                givenName: givenName,
+                                middleName: string.Empty,
+                                surName: surname,
+                                suffix: string.Empty,
+                                eportalUserId: string.Empty,
+                                contactEntity: null,
+                                address1: string.Empty,
+                                address2: string.Empty,
+                                city:string.Empty,
+                                state: string.Empty,
+                                zipCode: string.Empty,
+                                phoneNumber: string.Empty,
+                                extension: string.Empty,
+                                emailAddress: string.Empty,
+                                countryCode: string.Empty
+                            );
+            return new List<nc.EntityType> { new nc.EntityType(reviewer) };
+        }
+
     }
 
 }
