@@ -449,9 +449,31 @@ namespace AZServiceTest
                                     };
                     }
 
-                    foreach (var cb in transformedNDC.RecordDocketingCallbackMessage)
+                    List<nc.IdentificationType> rdcbmIdentification = null;
+                    string submissionIdText = ecf.EcfHelper.GetIdentificationValue(transformedNDC.RecordDocketingCallbackMessage[0].DocumentIdentification, amc.PolicyConstants.SUBMISSIONID);
+                    if (!string.IsNullOrWhiteSpace(submissionIdText) && transformedNDC.RecordDocketingCallbackMessage[0].DocumentIdentification != null )
+                    {
+                        // 
+                        rdcbmIdentification = new List<nc.IdentificationType>();
+                        rdcbmIdentification.Add(new nc.IdentificationType(identificationIDValue:ecf.EcfHelper.UUID , identificationCategoryValue: "NotificationID"));
+                        rdcbmIdentification.AddRange(transformedNDC.RecordDocketingCallbackMessage[0].DocumentIdentification);
+                        rdcbmIdentification.Add(new nc.IdentificationType(identificationIDValue: ecf.EcfHelper.UUID, identificationCategoryValue: amc.PolicyConstants.REVIEWED_SUBMISSION_ID));
+                    }
+                    List<nc.StatusType> rdcbmStatus = new List<nc.StatusType>
+                    {
+                        new nc.StatusType
+                        {
+                             StatusText = new List<nc.TextType> { new nc.TextType(amc.PolicyConstants.RDM_SUBMISSION_STATUS_SUBMISSION_FULLY_REVIEWED) }   ,
+                             StatusDate = new List<nc.DateType> { new nc.DateType(DateTime.Now)} ,
+                             StatusDescriptionText = new List<nc.TextType>() { new nc.TextType("SubmissionFullyDocketed") }
+                        }
+                    
+                    };
+
+                    foreach (aoc.RecordDocketingCallbackMessageType cb in transformedNDC.RecordDocketingCallbackMessage)
                     {
                         callBackNumber++;
+                        // DocumentIdentification 
                         if (callBackNumber == 1)
                         {
                             cb.DocumentSubmitter = documentReviwer;
@@ -459,6 +481,16 @@ namespace AZServiceTest
                         else
                         {
                             cb.DocumentSubmitter = documentReviwerAsReference;
+                        }
+                        cb.DocumentStatus = rdcbmStatus;
+                        if (rdcbmIdentification != null)
+                        {
+                            cb.DocumentIdentification = rdcbmIdentification;
+                        }
+                        // Filing Status 
+                        if (cb.FilingStatus != null && cb.FilingStatus.FilingStatusCode != null && !string.IsNullOrWhiteSpace(cb.FilingStatus.FilingStatusCode))
+                        {
+                            cb.FilingStatus.FilingStatusCode = cb.FilingStatus.FilingStatusCode.ToLowerInvariant();
                         }
                         if (cb.ReviewedLeadDocument != null && cb.ReviewedLeadDocument is aoc.ReviewedDocumentType)
                         {
@@ -495,6 +527,20 @@ namespace AZServiceTest
                 fixedDocument.DocumentIdentification = new List<nc.IdentificationType> { new nc.IdentificationType(coreFilingDocumentId, amc.PolicyConstants.DOCUMENT_ID) };
                 fixedDocument.Ref = null;
                 fixedDocument.DocumentSubmitter = documentReviwerAsReference;
+                // Fix document status 
+                if (fixedDocument.DocumentStatus != null && fixedDocument.DocumentStatus.Count > 0 && fixedDocument.DocumentStatus[0] != null )
+                {
+                    fixedDocument.DocumentStatus[0].StatusText = new List<nc.TextType> { new nc.TextType("0") };
+                    if ( fixedDocument.DocumentStatus[0].StatusDescriptionText != null && 
+                        fixedDocument.DocumentStatus[0].StatusDescriptionText.Count > 0 &&
+                        fixedDocument.DocumentStatus[0].StatusDescriptionText[0]  != null &&
+                        !string.IsNullOrWhiteSpace(fixedDocument.DocumentStatus[0].StatusDescriptionText[0].Value))
+                    {
+                        fixedDocument.DocumentStatus[0].StatusDescriptionText[0].Value = fixedDocument.DocumentStatus[0].StatusDescriptionText[0].Value.ToLowerInvariant();
+                    }
+
+                }
+
                 if (fixedDocument.DocumentMetadata != null && fixedDocument.DocumentMetadata is aoc.DocumentMetadataType)
                 {
                     aoc.DocumentMetadataType documentMetaData = fixedDocument.DocumentMetadata as aoc.DocumentMetadataType;
