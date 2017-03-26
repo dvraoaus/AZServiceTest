@@ -49,6 +49,7 @@
             this.buttonChangeDocumentType = new System.Windows.Forms.Button();
             this.btnFixNDC = new System.Windows.Forms.Button();
             this.btnGenerateNFRCFromNDC = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnGetCase
@@ -248,11 +249,23 @@
             this.btnGenerateNFRCFromNDC.UseVisualStyleBackColor = true;
             this.btnGenerateNFRCFromNDC.Click += new System.EventHandler(this.btnGenerateNFRCFromNDC_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(41, 381);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(197, 32);
+            this.button1.TabIndex = 901;
+            this.button1.TabStop = false;
+            this.button1.Text = "Validate RVFR";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(729, 662);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnGenerateNFRCFromNDC);
             this.Controls.Add(this.btnFixNDC);
             this.Controls.Add(this.buttonChangeDocumentType);
@@ -303,6 +316,7 @@
         private System.Windows.Forms.Button buttonChangeDocumentType;
         public System.Windows.Forms.Button btnFixNDC;
         public System.Windows.Forms.Button btnGenerateNFRCFromNDC;
+        private System.Windows.Forms.Button button1;
     }
 }
 
