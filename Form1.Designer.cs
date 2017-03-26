@@ -246,6 +246,7 @@
             this.btnGenerateNFRCFromNDC.TabIndex = 107;
             this.btnGenerateNFRCFromNDC.Text = "Generate NFRC From NDC";
             this.btnGenerateNFRCFromNDC.UseVisualStyleBackColor = true;
+            this.btnGenerateNFRCFromNDC.Click += new System.EventHandler(this.btnGenerateNFRCFromNDC_Click);
             // 
             // Form1
             // 

@@ -12,6 +12,8 @@ using niemxsd = Niem.Proxy.xsd.v20;
 using UBL21 = Oassis.UBL.v21;
 using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
 using VistaSG.Requests.DataContracts.Types;
+using reviewcb = Oasis.LegalXml.CourtFiling.v40.Filing;
+
 namespace AZServiceTest
 {
     public  class NDCHelper
@@ -610,6 +612,96 @@ namespace AZServiceTest
             return new List<nc.EntityType> { new nc.EntityType(reviewer) };
         }
 
+        public amc.NotifyFilingReviewCompleteRequestType ToNfrc(amc.NotifyDocketingCompleteRequestType ndcRequest)
+        {
+            amc.NotifyFilingReviewCompleteRequestType nfrcRequest = new amc.NotifyFilingReviewCompleteRequestType();
+            if (ndcRequest != null)
+            {
+                if (ndcRequest.RecordDocketingCallbackMessage != null && ndcRequest.RecordDocketingCallbackMessage.Count > 0)
+                {
+                    nfrcRequest.ReviewFilingCallbackMessage = new List<Oasis.LegalXml.CourtFiling.v40.Filing.ReviewFilingCallbackMessageType>();
+                    foreach (aoc.RecordDocketingCallbackMessageType cb in ndcRequest.RecordDocketingCallbackMessage)
+                    {
+                        nfrcRequest.ReviewFilingCallbackMessage.Add(ToReviewCallback(cb));
+                    }
+                }
+                nfrcRequest.PaymentReceiptMessage = this.ToPaymentReceipt(ndcRequest.PaymentMessage);
+            }
+            return nfrcRequest;
+
+        }
+
+        private reviewcb.ReviewFilingCallbackMessageType ToReviewCallback(aoc.RecordDocketingCallbackMessageType docketingCallBack)
+        {
+            reviewcb.ReviewFilingCallbackMessageType reviewCallBack = new reviewcb.ReviewFilingCallbackMessageType();
+            if (docketingCallBack != null)
+            {
+                reviewCallBack = new reviewcb.ReviewFilingCallbackMessageType
+                {
+                     Case = docketingCallBack.Case ,
+                     CaseTypeSelection = docketingCallBack.CaseTypeSelection ,
+                     DocumentApplicationName = docketingCallBack.DocumentApplicationName ,
+                     DocumentBinary = docketingCallBack.DocumentBinary ,
+                     DocumentCategoryText = docketingCallBack.DocumentCategoryText ,
+                     DocumentDescriptionText = docketingCallBack.DocumentDescriptionText ,
+                     DocumentEffectiveDate = docketingCallBack.DocumentEffectiveDate ,
+                     DocumentFileControlID = docketingCallBack.DocumentFileControlID ,
+                     DocumentFiledDate = docketingCallBack.DocumentFiledDate,
+                     DocumentIdentification = docketingCallBack.DocumentIdentification ,
+                     DocumentInformationCutOffDate = docketingCallBack.DocumentInformationCutOffDate ,
+                     DocumentLanguageCode = docketingCallBack.DocumentLanguageCode ,
+                     DocumentPostDate = docketingCallBack.DocumentPostDate ,
+                     DocumentReceivedDate = docketingCallBack.DocumentReceivedDate ,
+                     DocumentSequenceID = docketingCallBack.DocumentSequenceID ,
+                     DocumentStatus = docketingCallBack.DocumentStatus ,
+                     DocumentSubmitter = docketingCallBack.DocumentSubmitter , 
+                     DocumentTitleText = docketingCallBack.DocumentTitleText , 
+                     FilingStatus = docketingCallBack.FilingStatus  != null ? docketingCallBack.FilingStatus  : new ecf.FilingStatusType(),
+                     Id = docketingCallBack.Id ,
+                     LinkMetadata = docketingCallBack.LinkMetadata ,
+                     Metadata = docketingCallBack.Metadata ,
+                     ReviewedConnectedDocument  = docketingCallBack.ReviewedConnectedDocument ,
+                     ReviewedLeadDocument = docketingCallBack.ReviewedLeadDocument != null  ? docketingCallBack.ReviewedLeadDocument : new ecf.ReviewedDocumentType(),
+                     SendingMDELocationID = docketingCallBack.SendingMDELocationID  != null ? docketingCallBack.SendingMDELocationID  : new nc.IdentificationType(),
+                     SendingMDEProfileCode   = docketingCallBack.SendingMDEProfileCode 
+
+                };
+                if (docketingCallBack.FilingCompletionDate != null)
+                {
+                    reviewCallBack.FilingCompletionDate = docketingCallBack.FilingCompletionDate;
+                }
+                else if (docketingCallBack.DocumentFiledDate != null && docketingCallBack.DocumentFiledDate.Count > 0)
+                {
+                    reviewCallBack.FilingCompletionDate = docketingCallBack.DocumentFiledDate[0];
+                }
+                else
+                {
+                    docketingCallBack.FilingCompletionDate = new nc.DateType(DateTime.Now);
+                }
+
+
+            }
+            return reviewCallBack;
+        }
+        private aoc.PaymentReceiptMessageType ToPaymentReceipt(aoc.PaymentMessageType paymentMessage)
+        {
+            aoc.PaymentReceiptMessageType paymentReceipt = new aoc.PaymentReceiptMessageType();
+            if (paymentMessage != null)
+            {
+                paymentReceipt = new aoc.PaymentReceiptMessageType
+                {
+                        Address = paymentMessage.Address ,
+                        AllowanceCharge = paymentMessage.AllowanceCharge ,
+                        FeeExceptionReasonCode = paymentMessage.FeeExceptionReasonCode,
+                        FeeExceptionSupportingText = paymentMessage.FeeExceptionSupportingText ,
+                        Payment = paymentMessage.Payment,
+                         Metadata = paymentMessage.Metadata ,
+                         Payer = paymentMessage.Payer ,
+                         PayerName = paymentMessage.PayerName
+                    };
+            }
+            return paymentReceipt;
+        }
     }
 
 }

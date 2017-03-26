@@ -992,5 +992,103 @@ namespace AZServiceTest
 
             }
         }
+
+        private void btnGenerateNFRCFromNDC_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opeFileDialog = null;
+            try
+            {
+                opeFileDialog = new OpenFileDialog();
+                opeFileDialog.CheckFileExists = false;
+                opeFileDialog.CheckPathExists = true;
+                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                opeFileDialog.Title = "Select a NDC (NotifyDocketingCompleteRequest) to generate NFRC From ";
+                DialogResult dr = opeFileDialog.ShowDialog(this);
+                if (dr == DialogResult.OK)
+                {
+                    amc.NotifyDocketingCompleteRequestType originalNDC = null;
+                    XmlSerializer ndcrSerializer = new XmlSerializer(typeof(amc.NotifyDocketingCompleteRequestType));
+                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open, FileAccess.Read))
+                    {
+                        originalNDC = ndcrSerializer.Deserialize(fs) as amc.NotifyDocketingCompleteRequestType;
+                    }
+                    if (originalNDC != null)
+                    {
+                        NDCHelper ndcHelper = new NDCHelper();
+
+                        amc.NotifyFilingReviewCompleteRequestType nfrcRequests = ndcHelper.ToNfrc(ndcRequest: originalNDC);
+                        Save(nfrcRequests);
+                    }
+                    else
+                    {
+                        MessageBox.Show("AOC NDC Request is null", "Error");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (opeFileDialog != null)
+                {
+                    opeFileDialog.Dispose();
+                }
+            }
+
+        }
+
+
+        private void Save(amc.NotifyFilingReviewCompleteRequestType nfrcRequest)
+        {
+
+            SaveFileDialog saveFileDialog = null;
+            try
+            {
+                if (nfrcRequest != null)
+                {
+
+                    saveFileDialog = new SaveFileDialog();
+                    saveFileDialog.CheckFileExists = false;
+                    saveFileDialog.CheckPathExists = true;
+                    saveFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                    saveFileDialog.Title = "Select a file to save  to ";
+                    saveFileDialog.FileName = this.textBoxCaseNumber.Text;
+                    DialogResult dr = saveFileDialog.ShowDialog(this);
+                    if (dr == DialogResult.OK)
+                    {
+                        if (File.Exists(saveFileDialog.FileName))
+                        {
+                            File.Delete(saveFileDialog.FileName);
+                        }
+                        XmlSerializer ndcrSerializer = new XmlSerializer(typeof(amc.NotifyFilingReviewCompleteRequestType));
+                        using (var fs = new FileStream(saveFileDialog.FileName, FileMode.CreateNew, FileAccess.Write))
+                        {
+                            ndcrSerializer.Serialize(fs, nfrcRequest);
+                            fs.Flush();
+                            fs.Close();
+                        }
+
+                        MessageBox.Show(string.Format("Saved NFRC to {0}", saveFileDialog.FileName), "Save");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        string.Format("NDC is null !!!!"), "Save");
+                }
+            }
+            finally
+            {
+                if (saveFileDialog != null)
+                {
+                    saveFileDialog.Dispose();
+                    saveFileDialog = null;
+                }
+
+            }
+        }
     }
 }
