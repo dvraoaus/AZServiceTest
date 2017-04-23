@@ -50,6 +50,7 @@
             this.btnFixNDC = new System.Windows.Forms.Button();
             this.btnGenerateNFRCFromNDC = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnGetCase
@@ -221,7 +222,7 @@
             // 
             // buttonChangeDocumentType
             // 
-            this.buttonChangeDocumentType.Location = new System.Drawing.Point(53, 153);
+            this.buttonChangeDocumentType.Location = new System.Drawing.Point(41, 153);
             this.buttonChangeDocumentType.Name = "buttonChangeDocumentType";
             this.buttonChangeDocumentType.Size = new System.Drawing.Size(439, 23);
             this.buttonChangeDocumentType.TabIndex = 7;
@@ -260,11 +261,22 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(618, 114);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(239, 23);
+            this.button2.TabIndex = 902;
+            this.button2.Text = "Reject First Document and Accept Rest";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(729, 662);
+            this.ClientSize = new System.Drawing.Size(896, 687);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnGenerateNFRCFromNDC);
             this.Controls.Add(this.btnFixNDC);
@@ -317,6 +329,7 @@
         public System.Windows.Forms.Button btnFixNDC;
         public System.Windows.Forms.Button btnGenerateNFRCFromNDC;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
     }
 }
 

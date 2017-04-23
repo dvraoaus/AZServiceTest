@@ -24,19 +24,21 @@ namespace AZServiceTest
         {
         }
 
-        public wmp.NotifyDocketingCompleteRequest GetNDC(string documentStatusCode, string documentStatusDescription, string filingStatusCode, string filingStatusDescription, bool netZeroSubmission, decimal overPaymentAmount, bool changeDocumentType , string ajacsCaseNumber)
+        public wmp.NotifyDocketingCompleteRequest GetNDC(string documentStatusCode, string documentStatusDescription, string filingStatusCode, string filingStatusDescription, bool netZeroSubmission, decimal overPaymentAmount, bool changeDocumentType , string ajacsCaseNumber , bool rejectFirstDocument)
         {
             wmp.NotifyDocketingCompleteRequest ndcRequest = null;
 
             List<nc.EntityType> documentReviwer = null;
             List<nc.EntityType> documentReviwerAsReference = null;
-            wmp.RecordFilingRequest rfr = GetRfrFromRvfr(documentStatusCode, documentStatusDescription, documentReviwer: out documentReviwer, documentReviwerAsReference: out documentReviwerAsReference);
+            wmp.RecordFilingRequest rfr = GetRfrFromRvfr(documentStatusCode, documentStatusDescription, documentReviwer: out documentReviwer, documentReviwerAsReference: out documentReviwerAsReference , rejectFirstDocument:rejectFirstDocument);
             if (rfr != null)
             {
                 aoc.CoreFilingMessageType filingMessage = rfr.AZRecordFilingRequest.CoreFilingMessage;
                 aoc.PaymentMessageType paymentMessage = rfr.AZRecordFilingRequest.PaymentMessage;
                 List<aoc.RecordDocketingMessageType> docketingMessages = rfr.AZRecordFilingRequest.RecordDocketingMessage;
                 List<aoc.RecordDocketingCallbackMessageType> recordDocketingCallBackMessages = new List<aoc.RecordDocketingCallbackMessageType>();
+                string firstLeadDocumentId = filingMessage != null && filingMessage.FilingLeadDocument != null && filingMessage.FilingLeadDocument.Count > 0 && !string.IsNullOrWhiteSpace(filingMessage.FilingLeadDocument[0].Id) ?
+                    filingMessage.FilingLeadDocument[0].Id : string.Empty;
 
                 nc.CaseType callBackCase = new nc.CaseType();
                 aoc.CivilCaseType aocCivilCase = filingMessage.Case != null ? filingMessage.Case as aoc.CivilCaseType : null;
@@ -149,7 +151,7 @@ namespace AZServiceTest
                         string summaryDescription = charge.AllowanceChargeCategoryCode != null && !string.IsNullOrEmpty(charge.AllowanceChargeCategoryCode.Value) ? charge.AllowanceChargeCategoryCode.Value : string.Empty;
                         string chargeId = charge.ID != null && !string.IsNullOrWhiteSpace(charge.ID.Value) ? charge.ID.Value : string.Empty;
                         if (!string.IsNullOrWhiteSpace(chargeId) &&
-                             chargeId.Equals("P2", StringComparison.OrdinalIgnoreCase) &&
+                            chargeId.Equals("P2", StringComparison.OrdinalIgnoreCase) &&
                             summaryDescription.Equals(amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE, StringComparison.OrdinalIgnoreCase))
                         {
                             deleteList.Add(charge);
@@ -175,6 +177,32 @@ namespace AZServiceTest
 
                     paymentMessage.AllowanceCharge.Add(changedCharge);
                 }
+                if (rejectFirstDocument && paymentMessage != null && paymentMessage.AllowanceCharge != null && paymentMessage.AllowanceCharge.Count > 0)
+                {
+                    List<aoc.AllowanceChargeType> deleteList = new List<aoc.AllowanceChargeType>();
+                    foreach (aoc.AllowanceChargeType charge in paymentMessage.AllowanceCharge)
+                    {
+                        string summaryDescription = charge.AllowanceChargeCategoryCode != null && !string.IsNullOrEmpty(charge.AllowanceChargeCategoryCode.Value) ? charge.AllowanceChargeCategoryCode.Value : string.Empty;
+                        if 
+                        (
+                            summaryDescription.Equals(amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE, StringComparison.OrdinalIgnoreCase) &&
+                            charge.ID != null &&
+                            !string.IsNullOrWhiteSpace(charge.ID.Value) &&
+                            ( 
+                                charge.ID.Value.Equals("P2" , StringComparison.OrdinalIgnoreCase ) ||
+                                charge.ID.Value.Equals( string.Format("P{0}" , firstLeadDocumentId) , StringComparison.OrdinalIgnoreCase)
+                            )
+                         )
+                        {
+                            deleteList.Add(charge);
+                        }
+                    }
+                    foreach (var charge in deleteList)
+                    {
+                        paymentMessage.AllowanceCharge.Remove(charge);
+                    }
+
+                }
 
 
                 ndcRequest = new wmp.NotifyDocketingCompleteRequest
@@ -191,7 +219,7 @@ namespace AZServiceTest
         }
 
 
-        private  wmp.RecordFilingRequest GetRfrFromRvfr(string documentStatus, string statusDescription, out List<nc.EntityType> documentReviwer, out List<nc.EntityType> documentReviwerAsReference)
+        private  wmp.RecordFilingRequest GetRfrFromRvfr(string documentStatus, string statusDescription, out List<nc.EntityType> documentReviwer, out List<nc.EntityType> documentReviwerAsReference , bool rejectFirstDocument)
         {
             wmp.RecordFilingRequest rfr = null;
             string rvfrFile = GetFileNameToDeserialize();
@@ -236,6 +264,13 @@ namespace AZServiceTest
                         {
                             
                             documentNumber++;
+                            string reviewedDocumentStatus = documentStatus;
+                            string reviewedDocumentStatusDescription = statusDescription;
+                            if (documentNumber == 1 && rejectFirstDocument)
+                            {
+                                reviewedDocumentStatus = amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_REJECTED;
+                                reviewedDocumentStatusDescription = "REJECTING FIRST DOCUMENT";
+                            }
 
                             aoc.RecordDocketingMessageType docketingMessage = new aoc.RecordDocketingMessageType
                             {
@@ -255,7 +290,7 @@ namespace AZServiceTest
                                 DocumentSubmitter = documentReviwer,
                                 SendingMDELocationID = new nc.IdentificationType("http://az.gov/FRMDE:xxxx"),
                                 SendingMDEProfileCode = "urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:WebServicesProfile-2.0",
-                                ReviewedLeadDocument = ToReviewedDocument(ld as aoc.DocumentType, documentNumber, documentStatus , rfrPostDate, statusDescription),
+                                ReviewedLeadDocument = ToReviewedDocument(ld as aoc.DocumentType, documentNumber, reviewedDocumentStatus, rfrPostDate, reviewedDocumentStatusDescription),
                                 FilingReviewCommentsText = new nc.TextType(string.Empty)
                             };
                             docketingMessages.Add(docketingMessage);

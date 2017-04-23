@@ -386,7 +386,8 @@ namespace AZServiceTest
                         netZeroSubmission: false ,
                         overPaymentAmount : 0.00M ,
                         changeDocumentType : false ,
-                        ajacsCaseNumber:ajacsCaseNumber
+                        ajacsCaseNumber:ajacsCaseNumber ,
+                        rejectFirstDocument:false 
                     );
                 if (ndcRequest != null)
                 {
@@ -486,7 +487,8 @@ namespace AZServiceTest
                         netZeroSubmission:false ,
                         overPaymentAmount:0.00M ,
                         changeDocumentType : false ,
-                        ajacsCaseNumber:ajacsCaseNumber
+                        ajacsCaseNumber:ajacsCaseNumber ,
+                        rejectFirstDocument:false
                     );
                 if (ndcRequest != null)
                 {
@@ -544,7 +546,7 @@ namespace AZServiceTest
 
                     schemas.Add
                         (
-                            null,
+                            null, 
                             @"C:\development\eUniversa1\5.4\ECF4.01\xsd\common\ECF-3.0_Null_Signature_Profile_1.0.xsd"
                         );
 
@@ -645,7 +647,8 @@ namespace AZServiceTest
                         netZeroSubmission:true ,
                         overPaymentAmount:0.00M ,
                         changeDocumentType:false ,
-                        ajacsCaseNumber:ajacsCaseNumber
+                        ajacsCaseNumber:ajacsCaseNumber ,
+                        rejectFirstDocument:false 
                     );
                 if (ndcRequest != null)
                 {
@@ -806,7 +809,8 @@ namespace AZServiceTest
                             netZeroSubmission: false,
                             overPaymentAmount: overPaymentAmount ,
                             changeDocumentType : false  ,
-                            ajacsCaseNumber:ajacsCaseNumber
+                            ajacsCaseNumber:ajacsCaseNumber ,
+                            rejectFirstDocument:false
                         );
                     if (ndcRequest != null)
                     {
@@ -859,7 +863,8 @@ namespace AZServiceTest
                             netZeroSubmission: false,
                             overPaymentAmount: overPaymentAmount ,
                             changeDocumentType:true ,
-                            ajacsCaseNumber:ajacsCaseNumber
+                            ajacsCaseNumber:ajacsCaseNumber ,
+                            rejectFirstDocument:false
                         );
                     if (ndcRequest != null)
                     {
@@ -1149,6 +1154,56 @@ namespace AZServiceTest
                 {
                     opeFileDialog.Dispose();
                 }
+            }
+
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            wmp.IFilingReviewMDE _serviceChannel = null;
+            try
+            {
+                decimal overPaymentAmount = 0.00M;
+                    string ajacsCaseNumber = !string.IsNullOrWhiteSpace(this.tbAJACSCaseNumber.Text) ? this.tbAJACSCaseNumber.Text.Trim() : "P1300CV000800";
+                    NDCHelper ndcHelper = new NDCHelper();
+                    wmp.NotifyDocketingCompleteRequest ndcRequest = ndcHelper.GetNDC
+                        (
+                            documentStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            documentStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            filingStatusDescription: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                            netZeroSubmission: false,
+                            overPaymentAmount: overPaymentAmount,
+                            changeDocumentType: false,
+                            ajacsCaseNumber: ajacsCaseNumber,
+                            rejectFirstDocument: true
+                        );
+                    if (ndcRequest != null)
+                    {
+                        _serviceChannel = VistaSG.Services.ServicesFactory.CreateServiceChannel<wmp.IFilingReviewMDE>
+                            (
+                                "FilingReviewMDEService",
+                                _configFile
+                            );
+
+                        wmp.NotifyDocketingCompleteResponse response = _serviceChannel.NotifyDocketingComplete(ndcRequest);
+                        Save(response);
+
+                    }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (_serviceChannel != null && _serviceChannel is IClientChannel)
+                {
+                    VistaSG.Services.ServicesFactory.CloseChannel(_serviceChannel as IClientChannel);
+                }
+
+
             }
 
 
