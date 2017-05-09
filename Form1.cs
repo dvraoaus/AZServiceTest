@@ -1208,5 +1208,68 @@ namespace AZServiceTest
 
 
         }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opeFileDialog = null;
+            try
+            {
+                opeFileDialog = new OpenFileDialog();
+                opeFileDialog.CheckFileExists = false;
+                opeFileDialog.CheckPathExists = true;
+                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                opeFileDialog.Title = "Select a NFRC (NotifyFilingReviewCompleteRequest) Validate ";
+                DialogResult dr = opeFileDialog.ShowDialog(this);
+                if (dr == DialogResult.OK)
+                {
+                    XmlSchemaSet schemas = new XmlSchemaSet();
+
+                    schemas.Add
+                        (
+                            null,
+                            @"C:\development\eUniversa1\5.4\ECF4.01\xsd\exchange\NotifyFilingReviewComplete-MessageExchange.xsd"
+                        );
+
+                    schemas.Add
+                        (
+                            null,
+                            @"C:\development\eUniversa1\5.4\ECF4.01\xsd\common\ECF-3.0_Null_Signature_Profile_1.0.xsd"
+                        );
+
+
+                    XDocument doc = XDocument.Load(opeFileDialog.FileName);
+                    bool errors = false;
+                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                    doc.Validate(schemas, (o, validationError) =>
+                    {
+                        sb.Append(string.Format("{0}\r\n", validationError.Message));
+                        errors = true;
+                    }, true);
+                    if (errors)
+                    {
+                        MessageBox.Show(sb.ToString(), string.Format("document {0} {1}", opeFileDialog.FileName, "did not validate"));
+                    }
+                    else
+                    {
+                        MessageBox.Show(string.Format("document {0} {1}", opeFileDialog.FileName, "validated"));
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (opeFileDialog != null)
+                {
+                    opeFileDialog.Dispose();
+                }
+            }
+
+
+        }
     }
 }

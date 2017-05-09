@@ -291,6 +291,7 @@ namespace AZServiceTest
                                 SendingMDELocationID = new nc.IdentificationType("http://az.gov/FRMDE:xxxx"),
                                 SendingMDEProfileCode = "urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:WebServicesProfile-2.0",
                                 ReviewedLeadDocument = ToReviewedDocument(ld as aoc.DocumentType, documentNumber, reviewedDocumentStatus, rfrPostDate, reviewedDocumentStatusDescription),
+                                ReviewedConnectedDocument = GetConnectedReviewedDocuments(filingMessage:filingMessage, leadDocument:ld as aoc.DocumentType,documentNumber:ref documentNumber, documentStatus:reviewedDocumentStatus , rfrPostDate:rfrPostDate,statusDescription:reviewedDocumentStatusDescription) ,
                                 FilingReviewCommentsText = new nc.TextType(string.Empty)
                             };
                             docketingMessages.Add(docketingMessage);
@@ -312,6 +313,49 @@ namespace AZServiceTest
 
             }
             return rfr;
+        }
+
+        private List<ecf.ReviewedDocumentType> GetConnectedReviewedDocuments
+            (
+            aoc.CoreFilingMessageType filingMessage , 
+            aoc.DocumentType leadDocument , 
+            ref  int documentNumber, 
+            string documentStatus, 
+            DateTime rfrPostDate, 
+            string statusDescription
+            )
+        {
+            List<ecf.ReviewedDocumentType> connectedReviewedDocuments = null;
+            if (filingMessage != null && 
+                filingMessage.FilingConnectedDocument != null && 
+                filingMessage.FilingConnectedDocument.Count > 0 &&
+                leadDocument != null  &&
+                !string.IsNullOrWhiteSpace(leadDocument.Id) 
+                )
+            {
+                foreach (var cd in filingMessage.FilingConnectedDocument)
+                {
+                    if (cd.DocumentMetadata != null && cd.DocumentMetadata.ParentDocumentReference != null &&
+                          !string.IsNullOrWhiteSpace(cd.DocumentMetadata.ParentDocumentReference.Ref) &&
+                          cd.DocumentMetadata.ParentDocumentReference.Ref.Equals(leadDocument.Id, StringComparison.OrdinalIgnoreCase)
+                       )
+                    {
+                        if (connectedReviewedDocuments == null)
+                        {
+                            connectedReviewedDocuments = new List<ecf.ReviewedDocumentType>();
+                        }
+                        documentNumber++;
+                        aoc.ReviewedDocumentType reviewedConnectedDocument = ToReviewedDocument(cd as aoc.DocumentType, documentNumber, documentStatus, rfrPostDate, statusDescription);
+                        if (reviewedConnectedDocument != null)
+                        {
+                            connectedReviewedDocuments.Add(reviewedConnectedDocument);
+                        }
+                    }
+                }
+
+            }
+
+            return connectedReviewedDocuments;
         }
 
         private aoc.ReviewedDocumentType ToReviewedDocument(aoc.DocumentType leadDocument , int documentNumber , string documentStatus , DateTime rfrPostDate , string statusDescription)
