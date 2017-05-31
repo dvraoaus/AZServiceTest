@@ -18,6 +18,7 @@ using nc = Niem.NiemCore.v20;
 using niemxsd = Niem.Proxy.xsd.v20;
 using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
 using VistaSG.Requests.DataContracts.Types;
+using ubl21 = Oassis.UBL.v21;
 
 namespace AZServiceTest
 {
@@ -1270,6 +1271,50 @@ namespace AZServiceTest
             }
 
 
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                aoc.PaymentMessageType paymentMessage = new aoc.PaymentMessageType
+                {
+                    FeeExceptionReasonCode = string.Empty,
+                    FeeExceptionSupportingText = string.Empty,
+                    PayerName = string.Empty ,
+                    AllowanceCharge = new List<Oassis.UBL.v21.cac.AllowanceChargeType>
+                    {
+                            new aoc.AllowanceChargeType
+                            {
+                                ChargeIndicator = new ubl21.cbc.ChargeIndicatorType { },
+                                Amount =  new ubl21.cbc.AmountType { }
+                            }
+
+                    } ,
+                    Address = new ubl21.cac.AddressType() ,
+                    Payment = new ubl21.cac.PaymentType() 
+                };
+                XmlSerializerNamespaces nameSpaces = new System.Xml.Serialization.XmlSerializerNamespaces();
+                nameSpaces.Add("aoc", "http://schema.azcourts.az.gov/aoc/efiling/ecf/extension/2.0");
+                nameSpaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+                XmlSerializer serializer = new XmlSerializer(typeof(aoc.PaymentMessageType));
+                string paymentMessageXML = string.Empty;
+                using (var ms = new MemoryStream())
+                {
+                    serializer.Serialize(ms, paymentMessage, nameSpaces);
+                    ms.Flush();
+                    ms.Seek(0, SeekOrigin.Begin);
+                    StreamReader sr = new StreamReader(ms);
+                    paymentMessageXML = sr.ReadToEnd();
+                }
+                MessageBox.Show(paymentMessageXML);
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
     }
 }
