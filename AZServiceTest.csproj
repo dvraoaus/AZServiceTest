@@ -48,17 +48,28 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Amcad.Common.v5.4, Version=5.4.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\development\eUniversa1\5.4.5\CompiledAssemblies\Amcad.Common.v5.4.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Amcad.Requests.DataContracts.v5.4, Version=5.4.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.4\CompiledAssemblies\Amcad.Requests.DataContracts.v5.4.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.4.5\CompiledAssemblies\Amcad.Requests.DataContracts.v5.4.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.4\ExternalAssemblies\log4net.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.4.5\ExternalAssemblies\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Oasis.LegalXml.CourtFiling.v5.4, Version=5.4.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
+    <Reference Include="Oasis.LegalXml.CourtFiling.v5.4.5, Version=5.4.5.0.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\development\eUniversa1\5.4\CompiledAssemblies\Oasis.LegalXml.CourtFiling.v5.4.dll</HintPath>
+      <HintPath>..\..\development\eUniversa1\5.4.5\CompiledAssemblies\Oasis.LegalXml.CourtFiling.v5.4.5.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Oasis.LegalXml.CourtFiling30.v5.4.5, Version=5.4.5.0, Culture=neutral, PublicKeyToken=85d43299895e833b, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\development\eUniversa1\5.4.5\CompiledAssemblies\Oasis.LegalXml.CourtFiling30.v5.4.5.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -74,6 +85,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AZFilingAssemblyServiceAccess.cs" />
     <Compile Include="CustomClientChannel.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -85,9 +97,15 @@
     <Compile Include="ICourtRecordMDE.cs" />
     <Compile Include="IFilingReviewMDE.cs" />
     <Compile Include="LogHelper.cs" />
+    <Compile Include="MCNFRCHelper.cs" />
     <Compile Include="NDCHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service References\Maricopa.Services\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -111,6 +129,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Service References\Maricopa.Services\MCFAMDE.wsdl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -136,6 +155,21 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\Maricopa.Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\Maricopa.Services\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\Maricopa.Services\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\Maricopa.Services\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -20,6 +20,7 @@ using wmp = Oasis.LegalXml.CourtFiling.v40.WebServiceMessagingProfile;
 using VistaSG.Requests.DataContracts.Types;
 using ubl21 = Oassis.UBL.v21;
 
+
 namespace AZServiceTest
 {
     public partial class Form1 : Form
@@ -1315,6 +1316,179 @@ namespace AZServiceTest
             {
                 MessageBox.Show(ex.ToString());
             }
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog opeFileDialog = null;
+            Arizona.Courts.Services.v20.FilingAssemblyMDEServiceAccess famdeServiceAccess = null;
+            try
+            {
+                opeFileDialog = new OpenFileDialog();
+                opeFileDialog.CheckFileExists = false;
+                opeFileDialog.CheckPathExists = true;
+                opeFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                opeFileDialog.Title = "Select a NFRC (NotifyFilingReviewCompleteRequest) to Post ";
+                DialogResult dr = opeFileDialog.ShowDialog(this);
+                if (dr == DialogResult.OK)
+                {
+                    amc.NotifyFilingReviewCompleteRequestType nfrc = null;
+                    XmlSerializer ndcrSerializer = new XmlSerializer(typeof(amc.NotifyFilingReviewCompleteRequestType));
+                    using (var fs = new FileStream(opeFileDialog.FileName, FileMode.Open, FileAccess.Read))
+                    {
+                        nfrc = ndcrSerializer.Deserialize(fs) as amc.NotifyFilingReviewCompleteRequestType;
+                    }
+                    if (nfrc != null)
+                    {
+                        string configurationFile = VistaSG.Common.ConfigurationHelper.GetSetting("famdeConfigurationFile");
+                        famdeServiceAccess = new Arizona.Courts.Services.v20.FilingAssemblyMDEServiceAccess { ServiceConfigurationFileName = configurationFile };
+                        string response = famdeServiceAccess.NotifyReviewComplete(nfrc);
+                        MessageBox.Show(string.Format("Posted NFRC File {0} Response {1}", opeFileDialog.FileName , response));
+                    }
+                    else
+                    {
+                        MessageBox.Show(string.Format("NFRC is null File name {0}", opeFileDialog.FileName));
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (opeFileDialog != null)
+                {
+                    opeFileDialog.Dispose();
+                }
+                if (famdeServiceAccess != null)
+                {
+                    famdeServiceAccess.Dispose();
+                }
+
+            }
+
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            // Exception ex = new Exception("Exception has been thrown by the target of an invocation.  Value can't be null");
+            Exception ex = new Exception(" An error occurred while making the HTTP request to https://uvazefmuat.turbocourt.com/efsp-uvaz/NotifyFilingReviewComplete. This could be due to the fact that the server certificate is not configured properly with HTTP.SYS in the HTTPS case. This could also be caused by a mismatch of the security binding between the client and the server.");
+            string exceptionMessage = ex.ToString();
+            if (exceptionMessage.Length > 100)
+            {
+                exceptionMessage = exceptionMessage.Substring(0, 100);
+            }
+            MessageBox.Show(string.Format("Exception {0}", exceptionMessage));
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            Maricopa.Services.FilingAssemblyMDEClient serviceClient = new Maricopa.Services.FilingAssemblyMDEClient();
+            try
+            {
+                
+                MCNFRCHelper nfrcHelper = new MCNFRCHelper();
+                string nfrcText = nfrcHelper.GetNFRC
+                    (
+                        filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_ACCEPTED,
+                        rejectionReason: string.Empty
+                    );
+                if (!string.IsNullOrWhiteSpace(nfrcText))
+                {
+                    object callReturn = serviceClient.notifyFilingReviewComplete(nfrcText);
+                    MessageBox.Show("Call Complete");
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (serviceClient != null)
+                {
+                    serviceClient.Close();
+                }
+
+            }
+
+        }
+
+        private void buttonmcrejected_Click(object sender, EventArgs e)
+        {
+            Maricopa.Services.FilingAssemblyMDEClient serviceClient = new Maricopa.Services.FilingAssemblyMDEClient();
+            try
+            {
+
+                MCNFRCHelper nfrcHelper = new MCNFRCHelper();
+                string nfrcText = nfrcHelper.GetNFRC
+                    (
+                        filingStatusCode: amc.PolicyConstants.REVIEWED_DOCUMENT_STATUS_REJECTED,
+                        rejectionReason: "The document must be captioned for Maricopa County Superior Court and include the correct names of the parties. Carl Collins should be the first listed defendant."
+                    );
+                if (!string.IsNullOrWhiteSpace(nfrcText))
+                {
+                    object callReturn = serviceClient.notifyFilingReviewComplete(nfrcText);
+                    MessageBox.Show("Call Complete");
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (serviceClient != null)
+                {
+                    serviceClient.Close();
+                }
+
+            }
+
+
+        }
+
+        private void buttonmcjudgereview_Click(object sender, EventArgs e)
+        {
+            Maricopa.Services.FilingAssemblyMDEClient serviceClient = new Maricopa.Services.FilingAssemblyMDEClient();
+            try
+            {
+
+                MCNFRCHelper nfrcHelper = new MCNFRCHelper();
+                string nfrcText = nfrcHelper.GetNFRC
+                    (
+                        filingStatusCode: "pending judge review",
+                        rejectionReason: string.Empty
+                    );
+                if (!string.IsNullOrWhiteSpace(nfrcText))
+                {
+                    object callReturn = serviceClient.notifyFilingReviewComplete(nfrcText);
+                    MessageBox.Show("Call Complete");
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                if (serviceClient != null)
+                {
+                    serviceClient.Close();
+                }
+
+            }
+
+
         }
     }
 }

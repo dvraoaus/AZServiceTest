@@ -133,7 +133,7 @@ namespace AZServiceTest
                     foreach (aoc.AllowanceChargeType charge in paymentMessage.AllowanceCharge)
                     {
                         string summaryDescription = charge.AllowanceChargeCategoryCode != null && !string.IsNullOrEmpty(charge.AllowanceChargeCategoryCode.Value) ? charge.AllowanceChargeCategoryCode.Value : string.Empty;
-                        decimal itemAmount = charge.Amount != null && charge.Amount.Value != null ? (decimal)charge.Amount.Value : 0.00M;
+                        decimal itemAmount = charge.Amount != null ? charge.Amount.Value : 0.00M;
 
                         if (itemAmount > overPaymentAmount && summaryDescription.Equals(amc.PolicyConstants.ALLOWANCE_CHARGE_CATEGORY_CODE_FILING_FEE, StringComparison.OrdinalIgnoreCase))
                         {

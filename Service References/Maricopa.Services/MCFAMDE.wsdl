@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:impl="http://com.wiznet/filingassemblymde/types" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" targetNamespace="http://com.wiznet/filingassemblymde/types" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://com.wiznet/filingassemblymde/types">
+      <xsd:element name="notifyFilingReviewComplete" type="xsd:anyType" />
+      <xsd:element name="notifyFilingReviewCompleteReturn" type="xsd:anyType" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="notifyFilingReviewCompleteRequest">
+    <wsdl:part name="part" element="impl:notifyFilingReviewComplete" />
+  </wsdl:message>
+  <wsdl:message name="notifyFilingReviewCompleteResponse">
+    <wsdl:part name="notifyFilingReviewCompleteReturn" element="impl:notifyFilingReviewCompleteReturn" />
+  </wsdl:message>
+  <wsdl:portType name="FilingAssemblyMDE">
+    <wsdl:operation name="notifyFilingReviewComplete">
+      <wsdl:input name="notifyFilingReviewCompleteRequest" message="impl:notifyFilingReviewCompleteRequest" />
+      <wsdl:output name="notifyFilingReviewCompleteResponse" message="impl:notifyFilingReviewCompleteResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="FilingAssemblyMDESoapBinding" type="impl:FilingAssemblyMDE">
+    <wsdlsoap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="notifyFilingReviewComplete">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="notifyFilingReviewCompleteRequest">
+        <wsdlsoap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output name="notifyFilingReviewCompleteResponse">
+        <wsdlsoap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FilingAssemblyMDEService">
+    <wsdl:port name="FilingAssemblyMDE" binding="impl:FilingAssemblyMDESoapBinding">
+      <wsdlsoap:address location="https://nv-apptest4.amcad.com/MCFAMDE/proxy.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

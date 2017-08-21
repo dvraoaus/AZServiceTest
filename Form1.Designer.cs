@@ -53,11 +53,16 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.buttonmcaccepted = new System.Windows.Forms.Button();
+            this.buttonmcrejected = new System.Windows.Forms.Button();
+            this.buttonmcjudgereview = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnGetCase
             // 
-            this.btnGetCase.Location = new System.Drawing.Point(413, 203);
+            this.btnGetCase.Location = new System.Drawing.Point(413, 281);
             this.btnGetCase.Name = "btnGetCase";
             this.btnGetCase.Size = new System.Drawing.Size(119, 23);
             this.btnGetCase.TabIndex = 101;
@@ -87,7 +92,7 @@
             // 
             // btnValidateAOCCase
             // 
-            this.btnValidateAOCCase.Location = new System.Drawing.Point(41, 343);
+            this.btnValidateAOCCase.Location = new System.Drawing.Point(41, 421);
             this.btnValidateAOCCase.Name = "btnValidateAOCCase";
             this.btnValidateAOCCase.Size = new System.Drawing.Size(197, 32);
             this.btnValidateAOCCase.TabIndex = 105;
@@ -99,7 +104,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(25, 203);
+            this.label1.Location = new System.Drawing.Point(25, 281);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(44, 13);
             this.label1.TabIndex = 0;
@@ -107,7 +112,7 @@
             // 
             // textBoxCaseNumber
             // 
-            this.textBoxCaseNumber.Location = new System.Drawing.Point(110, 203);
+            this.textBoxCaseNumber.Location = new System.Drawing.Point(110, 281);
             this.textBoxCaseNumber.MaxLength = 50;
             this.textBoxCaseNumber.Name = "textBoxCaseNumber";
             this.textBoxCaseNumber.Size = new System.Drawing.Size(270, 20);
@@ -116,7 +121,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(25, 239);
+            this.label2.Location = new System.Drawing.Point(25, 317);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(69, 13);
             this.label2.TabIndex = 0;
@@ -124,7 +129,7 @@
             // 
             // tbDocketId
             // 
-            this.tbDocketId.Location = new System.Drawing.Point(110, 241);
+            this.tbDocketId.Location = new System.Drawing.Point(110, 319);
             this.tbDocketId.MaxLength = 50;
             this.tbDocketId.Name = "tbDocketId";
             this.tbDocketId.Size = new System.Drawing.Size(270, 20);
@@ -132,7 +137,7 @@
             // 
             // btnGetDocument
             // 
-            this.btnGetDocument.Location = new System.Drawing.Point(413, 253);
+            this.btnGetDocument.Location = new System.Drawing.Point(413, 331);
             this.btnGetDocument.Name = "btnGetDocument";
             this.btnGetDocument.Size = new System.Drawing.Size(119, 23);
             this.btnGetDocument.TabIndex = 103;
@@ -169,7 +174,7 @@
             // 
             // btngetCasesFromFile
             // 
-            this.btngetCasesFromFile.Location = new System.Drawing.Point(41, 292);
+            this.btngetCasesFromFile.Location = new System.Drawing.Point(41, 370);
             this.btngetCasesFromFile.Name = "btngetCasesFromFile";
             this.btngetCasesFromFile.Size = new System.Drawing.Size(197, 23);
             this.btngetCasesFromFile.TabIndex = 104;
@@ -179,7 +184,7 @@
             // 
             // tbStatus
             // 
-            this.tbStatus.Location = new System.Drawing.Point(33, 418);
+            this.tbStatus.Location = new System.Drawing.Point(33, 496);
             this.tbStatus.Multiline = true;
             this.tbStatus.Name = "tbStatus";
             this.tbStatus.ReadOnly = true;
@@ -189,7 +194,7 @@
             // 
             // buttonOverPayment
             // 
-            this.buttonOverPayment.Location = new System.Drawing.Point(383, 117);
+            this.buttonOverPayment.Location = new System.Drawing.Point(383, 195);
             this.buttonOverPayment.Name = "buttonOverPayment";
             this.buttonOverPayment.Size = new System.Drawing.Size(211, 23);
             this.buttonOverPayment.TabIndex = 6;
@@ -199,7 +204,7 @@
             // 
             // tbOverPaymentAmount
             // 
-            this.tbOverPaymentAmount.Location = new System.Drawing.Point(172, 117);
+            this.tbOverPaymentAmount.Location = new System.Drawing.Point(172, 195);
             this.tbOverPaymentAmount.MaxLength = 50;
             this.tbOverPaymentAmount.Name = "tbOverPaymentAmount";
             this.tbOverPaymentAmount.Size = new System.Drawing.Size(173, 20);
@@ -208,7 +213,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(50, 120);
+            this.label4.Location = new System.Drawing.Point(50, 198);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(116, 13);
             this.label4.TabIndex = 0;
@@ -217,14 +222,14 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(72, 153);
+            this.label5.Location = new System.Drawing.Point(72, 231);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(0, 13);
             this.label5.TabIndex = 9;
             // 
             // buttonChangeDocumentType
             // 
-            this.buttonChangeDocumentType.Location = new System.Drawing.Point(41, 153);
+            this.buttonChangeDocumentType.Location = new System.Drawing.Point(41, 231);
             this.buttonChangeDocumentType.Name = "buttonChangeDocumentType";
             this.buttonChangeDocumentType.Size = new System.Drawing.Size(439, 23);
             this.buttonChangeDocumentType.TabIndex = 7;
@@ -234,7 +239,7 @@
             // 
             // btnFixNDC
             // 
-            this.btnFixNDC.Location = new System.Drawing.Point(248, 343);
+            this.btnFixNDC.Location = new System.Drawing.Point(248, 421);
             this.btnFixNDC.Name = "btnFixNDC";
             this.btnFixNDC.Size = new System.Drawing.Size(141, 32);
             this.btnFixNDC.TabIndex = 106;
@@ -244,7 +249,7 @@
             // 
             // btnGenerateNFRCFromNDC
             // 
-            this.btnGenerateNFRCFromNDC.Location = new System.Drawing.Point(424, 343);
+            this.btnGenerateNFRCFromNDC.Location = new System.Drawing.Point(424, 421);
             this.btnGenerateNFRCFromNDC.Name = "btnGenerateNFRCFromNDC";
             this.btnGenerateNFRCFromNDC.Size = new System.Drawing.Size(222, 32);
             this.btnGenerateNFRCFromNDC.TabIndex = 107;
@@ -254,7 +259,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(41, 381);
+            this.button1.Location = new System.Drawing.Point(41, 459);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(197, 32);
             this.button1.TabIndex = 901;
@@ -265,7 +270,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(618, 114);
+            this.button2.Location = new System.Drawing.Point(618, 192);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(239, 23);
             this.button2.TabIndex = 902;
@@ -275,7 +280,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(248, 381);
+            this.button3.Location = new System.Drawing.Point(248, 459);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(197, 32);
             this.button3.TabIndex = 903;
@@ -286,7 +291,7 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(466, 381);
+            this.button4.Location = new System.Drawing.Point(466, 459);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(197, 32);
             this.button4.TabIndex = 904;
@@ -295,11 +300,68 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(687, 459);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(197, 32);
+            this.button5.TabIndex = 905;
+            this.button5.TabStop = false;
+            this.button5.Text = "Post NFRC";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(633, 331);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(197, 32);
+            this.button6.TabIndex = 906;
+            this.button6.TabStop = false;
+            this.button6.Text = "Substring test";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // buttonmcaccepted
+            // 
+            this.buttonmcaccepted.Location = new System.Drawing.Point(28, 125);
+            this.buttonmcaccepted.Name = "buttonmcaccepted";
+            this.buttonmcaccepted.Size = new System.Drawing.Size(235, 23);
+            this.buttonmcaccepted.TabIndex = 907;
+            this.buttonmcaccepted.Text = "MC Accepted NFRC From CFM";
+            this.buttonmcaccepted.UseVisualStyleBackColor = true;
+            this.buttonmcaccepted.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // buttonmcrejected
+            // 
+            this.buttonmcrejected.Location = new System.Drawing.Point(269, 125);
+            this.buttonmcrejected.Name = "buttonmcrejected";
+            this.buttonmcrejected.Size = new System.Drawing.Size(211, 23);
+            this.buttonmcrejected.TabIndex = 908;
+            this.buttonmcrejected.Text = "MC Rejected NFRC From CFM";
+            this.buttonmcrejected.UseVisualStyleBackColor = true;
+            this.buttonmcrejected.Click += new System.EventHandler(this.buttonmcrejected_Click);
+            // 
+            // buttonmcjudgereview
+            // 
+            this.buttonmcjudgereview.Location = new System.Drawing.Point(492, 125);
+            this.buttonmcjudgereview.Name = "buttonmcjudgereview";
+            this.buttonmcjudgereview.Size = new System.Drawing.Size(283, 23);
+            this.buttonmcjudgereview.TabIndex = 909;
+            this.buttonmcjudgereview.Text = "MC Pending Judge Review  NFRC From CFM";
+            this.buttonmcjudgereview.UseVisualStyleBackColor = true;
+            this.buttonmcjudgereview.Click += new System.EventHandler(this.buttonmcjudgereview_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(896, 687);
+            this.ClientSize = new System.Drawing.Size(896, 754);
+            this.Controls.Add(this.buttonmcjudgereview);
+            this.Controls.Add(this.buttonmcrejected);
+            this.Controls.Add(this.buttonmcaccepted);
+            this.Controls.Add(this.button6);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
@@ -358,6 +420,11 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button buttonmcaccepted;
+        private System.Windows.Forms.Button buttonmcrejected;
+        private System.Windows.Forms.Button buttonmcjudgereview;
     }
 }
 
